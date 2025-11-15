@@ -269,7 +269,7 @@ in
         ++ (optional (
           config.extraPackagesAfter != [ ]
         ) ''--suffix PATH : "${lib.makeBinPath config.extraPackagesAfter}"'')
-        ++ (optional config.wrapRc ''--add-flags -u --add-flags "${initFile}"'')
+        ++ (optional config.wrapRc ''--set-default VIMINIT "lua dofile('${initFile}')"'')
       );
 
       package =
