@@ -7,7 +7,7 @@ Using a plugin not supported by nixvim, but packaged in nixpkgs is straightforwa
 - Register the plugin through `extraPlugins`: `extraPlugins = [pkgs.vimPlugins."<plugin name>"]`.
 - Configure the plugin through `extraConfigLua`: `extraConfigLua = "require('my-plugin').setup({foo = "bar"})";`
 
-## How do I use a plugin not yet merged into NixVim or temporarily modify one
+## How do I use a plugin not yet merged into Nixvim or temporarily modify one
 
 Copy the module expression formatted like this into a file:
 
@@ -18,7 +18,8 @@ lib.nixvim.plugins.mkNeovimPlugin {
 }
 ```
 
-Import it into your NixVim configuration and configure it:
+Import it into your Nixvim configuration and configure it:
+
 ```nix
 {
   # Remove this `programs.nixvim` wrapper for standalone configurations
@@ -36,7 +37,8 @@ Import it into your NixVim configuration and configure it:
 This is straightforward too, you can add the following to `extraPlugins` for a plugin hosted on GitHub:
 
 ```nix
-extraPlugins = [(pkgs.vimUtils.buildVimPlugin {
+{
+  extraPlugins = [(pkgs.vimUtils.buildVimPlugin {
     name = "my-plugin";
     src = pkgs.fetchFromGitHub {
         owner = "<owner>";
@@ -44,7 +46,8 @@ extraPlugins = [(pkgs.vimUtils.buildVimPlugin {
         rev = "<commit hash>";
         hash = "<nix NAR hash>";
     };
-})];
+  })];
+}
 ```
 
 The [nixpkgs manual](https://nixos.org/manual/nixpkgs/stable/#managing-plugins-with-vim-packages) has more information on this.
@@ -83,17 +86,13 @@ When using Nixvim, it is possible to encounter errors about something not being 
  error: <name> cannot be found in pkgs
 ```
 
-This usually means one of two things:
-- The nixpkgs version is not in line with NixVim (for example nixpkgs nixos-25.05 is used with NixVim master)
-- The nixpkgs unstable version used with NixVim is not recent enough.
+This usually means one of few things:
+- You are using `follows` on `inputs.nixvim` causing Nixvim to have an unexpected version of Nixpkgs.
+- The nixpkgs version is not in line with Nixvim (for example nixpkgs nixos-25.11 is used with Nixvim master)
+- The nixpkgs unstable version used with Nixvim is not recent enough.
 
-When building nixvim using flakes and our ["standalone mode"][standalone], we usually recommend _not_ declaring a "follows" for `inputs.nixvim`.
-This is so that nixvim is built against the same nixpkgs revision we're using in our test suite.
-
-If you are building nixvim using the NixOS, Home Manager, or nix-darwin modules then we advise that you keep your nixpkgs lock as close as possible to ours.
-
-> [!TIP]
-> Once [#1784](https://github.com/nix-community/nixvim/issues/1784) is implemented, there will be alternative ways to achieve this using the module system.
+When building Nixvim using flakes, we usually recommend _not_ declaring a `follows` for `inputs.nixvim`.
+This is so that Nixvim is built against the same nixpkgs revision we're using in our test suite.
 
 [standalone]: ../platforms/standalone.md
 
@@ -102,44 +101,48 @@ If you are building nixvim using the NixOS, Home Manager, or nix-darwin modules 
 You could use the builtin [`map`] function (or similar) to do something like this:
 
 ```nix
-keymaps =
-  (builtins.map (key: {
-    inherit key;
-    action = "<some-action>";
-    options.desc = "My cool keymapping";
-  }) ["<key-1>" "<key-2>" "<key-3>"])
-  ++ [
-    # Other keymaps...
-  ];
+{
+  keymaps =
+    (map (key: {
+      inherit key;
+      action = "<some-action>";
+      options.desc = "My cool keymapping";
+    }) ["<key-1>" "<key-2>" "<key-3>"])
+    ++ [
+      # Other keymaps...
+    ];
+}
 ```
 
 This maps a list of keys into a list of similar [`keymaps`]. It is equivalent to:
 
 ```nix
-keymaps = [
-  {
-    key = "<key-1>";
-    action = "<some-action>";
-    options.desc = "My cool keymapping";
-  }
-  {
-    key = "<key-2>";
-    action = "<some-action>";
-    options.desc = "My cool keymapping";
-  }
-  {
-    key = "<key-3>";
-    action = "<some-action>";
-    options.desc = "My cool keymapping";
-  }
-  # Other keymaps...
-];
+{
+  keymaps = [
+    {
+      key = "<key-1>";
+      action = "<some-action>";
+      options.desc = "My cool keymapping";
+    }
+    {
+      key = "<key-2>";
+      action = "<some-action>";
+      options.desc = "My cool keymapping";
+    }
+    {
+      key = "<key-3>";
+      action = "<some-action>";
+      options.desc = "My cool keymapping";
+    }
+    # Other keymaps...
+  ];
+}
 ```
 
 [`map`]: https://nixos.org/manual/nix/stable/language/builtins#builtins-map
 [`keymaps`]: ../keymaps
 
-## How to use system provided binaries instead of nixvim provided ones
+## How to use system provided binaries instead of Nixvim provided ones
 
 There are a number of plugins that install extra packages using `nix`, but this can cause issues.
 For example enabling `plugins.treesitter` could add `gcc` to the PATH of neovim, and this could break workflows that rely on the system provided compiler.

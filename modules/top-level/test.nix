@@ -3,6 +3,8 @@
   config,
   options,
   lib,
+  helpers,
+  extendModules,
   ...
 }:
 let
@@ -100,7 +102,7 @@ in
 
     buildNixvim = lib.mkOption {
       type = lib.types.bool;
-      description = "Whether to build the nixvim config in the test.";
+      description = "Whether to build the Nixvim config in the test.";
       default = true;
     };
 
@@ -263,17 +265,44 @@ in
 
   config =
     let
+      # Reevaluate the nixvim configuration in "test mode"
+      # This allows users to use `lib.nixvim.enableExceptInTests`
+      testConfiguration =
+        let
+          # TODO: replace and deprecate enableExceptInTests
+          # We shouldn't need to use another instance of `lib` when building a test drv
+          # Maybe add a context option e.g. `config.isTest`?
+          nixvimLibOverlay = final: prev: {
+            utils = prev.utils // {
+              enableExceptInTests = false;
+            };
+          };
+          extendedConfiguration = extendModules {
+            specialArgs = {
+              lib = lib.extend (
+                final: prev: {
+                  nixvim = prev.nixvim.extend nixvimLibOverlay;
+                }
+              );
+              helpers = helpers.extend nixvimLibOverlay;
+            };
+          };
+        in
+        if lib.nixvim.enableExceptInTests then extendedConfiguration else { inherit config options; };
+
       input = {
-        inherit (config) warnings;
-        assertions = builtins.concatMap (x: lib.optional (!x.assertion) x.message) config.assertions;
+        inherit (testConfiguration.config) warnings;
+        assertions = builtins.concatMap (
+          x: lib.optional (!x.assertion) x.message
+        ) testConfiguration.config.assertions;
       };
 
       expectationMessages =
         name:
         lib.pipe cfg.${name} [
           (builtins.filter (x: !x.predicate input.${name}))
-          (builtins.map (x: x.message))
-          (builtins.map (msg: if lib.isFunction msg then msg input.${name} else msg))
+          (map (x: x.message))
+          (map (msg: if lib.isFunction msg then msg input.${name} else msg))
           (
             x:
             if x == [ ] then
@@ -323,7 +352,7 @@ in
             nativeBuildInputs =
               cfg.extraInputs
               ++ lib.optionals cfg.buildNixvim [
-                config.build.nvimPackage
+                testConfiguration.config.build.nvimPackage
               ];
 
             inherit (failedExpectations) warnings assertions;
@@ -331,11 +360,12 @@ in
             # Allow inspecting the test's module a little from the repl
             # e.g.
             # :lf .
-            # :p checks.x86_64-linux.test-1.passthru.entries.modules-autocmd.passthru.entries.example.passthru.config.extraConfigLua
+            # :p checks.x86_64-linux.tests.entries.modules-autocmd.entries.example.config.extraConfigLua
             #
-            # Yes, three levels of passthru is cursed.
+            # Yes, three levels of `entries` is cursed.
             passthru = {
-              inherit config options;
+              inherit (testConfiguration) config options;
+              configuration = testConfiguration;
             };
           }
           (

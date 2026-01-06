@@ -1,9 +1,8 @@
 {
-  helpers,
   system,
   nixvim,
   nixpkgs,
-  nuschtosSearch,
+  mkNuschtosSearch,
 }:
 let
   # We overlay a few tweaks into pkgs, for use in the docs
@@ -84,7 +83,7 @@ let
       ) opt.declarations;
     };
 
-  configuration = helpers.modules.evalNixvim {
+  configuration = nixvim.lib.evalNixvim {
     modules = [
       {
         isDocs = true;
@@ -115,7 +114,7 @@ lib.fix (self: {
     inherit nixvim lib;
   };
 
-  search = nuschtosSearch.packages.mkSearch {
+  search = mkNuschtosSearch {
     optionsJSON = options-json + "/share/doc/nixos/options.json";
     urlPrefix = "https://github.com/nix-community/nixvim/tree/main";
     title = "Nixvim options search";

@@ -1,4 +1,7 @@
-self:
+{
+  self,
+  extendModules,
+}:
 {
   config,
   lib,
@@ -9,21 +12,20 @@ let
     mkIf
     ;
   cfg = config.programs.nixvim;
-  evalArgs = {
-    extraSpecialArgs = {
-      hmConfig = config;
-    };
-    modules = [
-      ./modules/hm.nix
-    ];
-  };
 in
 {
   _file = ./hm.nix;
 
   imports = [
     (import ./_shared.nix {
-      inherit self evalArgs;
+      inherit self;
+      inherit
+        (extendModules {
+          specialArgs.hmConfig = config;
+          modules = [ ./modules/hm.nix ];
+        })
+        extendModules
+        ;
       filesOpt = [
         "xdg"
         "configFile"
@@ -36,7 +38,10 @@ in
       cfg.build.package
     ];
 
-    home.sessionVariables = mkIf cfg.defaultEditor { EDITOR = "nvim"; };
+    home.sessionVariables = mkIf cfg.defaultEditor {
+      EDITOR = "nvim";
+      VISUAL = "nvim";
+    };
 
     programs = mkIf cfg.vimdiffAlias {
       bash.shellAliases.vimdiff = "nvim -d";

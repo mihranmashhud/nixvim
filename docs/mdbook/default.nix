@@ -37,7 +37,7 @@ let
     # whether to nest into a sub-page, so that we can keep the original
     # _freeformOptions attr as intended.
     attrs._freeformOptions or { }
-    // builtins.removeAttrs attrs [
+    // removeAttrs attrs [
       "_module"
       "_freeformOptions"
       "warnings"
@@ -48,35 +48,39 @@ let
   removeWhitespace = builtins.replaceStrings [ " " ] [ "" ];
 
   getSubOptions =
-    opts: path:
-    lib.optionalAttrs (isDeeplyVisible opts) (removeUnwanted (opts.type.getSubOptions path));
+    opt:
+    let
+      visible = opt.visible or true;
+      visible' = if lib.isBool visible then visible else visible != "shallow";
+      subOpts = opt.type.getSubOptions opt.loc;
+    in
+    lib.optionalAttrs visible' (removeUnwanted subOpts);
 
-  isVisible = isVisibleWith true;
-  isDeeplyVisible = isVisibleWith false;
-
-  isVisibleWith =
-    shallow: opts:
+  isVisible =
     let
       test =
         opt:
         let
           internal = opt.internal or false;
           visible = opt.visible or true;
-          visible' = if visible == "shallow" then shallow else visible;
+          visible' = if lib.isBool visible then visible else visible != "transparent";
         in
         visible' && !internal;
+
+      # FIXME: isVisible is not a perfect check;
+      # it will false-positive on `visible = "transparent"`
+      hasVisible = opts: lib.any (v: lib.isAttrs v -> isVisible v) (lib.attrValues opts);
     in
+    opts:
     if lib.isOption opts then
       test opts
     else if opts.isOption then
       test opts.index.options
     else
-      let
-        filterFunc = lib.filterAttrs (_: v: if lib.isAttrs v then isVisibleWith shallow v else true);
-        hasEmptyIndex = (filterFunc opts.index.options) == { };
-        hasEmptyComponents = (filterFunc opts.components) == { };
-      in
-      !hasEmptyIndex || !hasEmptyComponents;
+      lib.any hasVisible [
+        opts.index.options
+        opts.components
+      ];
 
   wrapOptionDocPage = path: opts: isOpt: rec {
     index = {
@@ -92,7 +96,7 @@ let
         let
           info = lib.attrByPath path { } nixvimInfo;
           maintainers = lib.unique (configuration.config.meta.maintainers.${info.file} or [ ]);
-          maintainersNames = builtins.map maintToMD maintainers;
+          maintainersNames = map maintToMD maintainers;
           maintToMD = m: if m ? github then "[${m.name}](https://github.com/${m.github})" else m.name;
         in
         # Make sure this path has a valid info attrset
@@ -136,7 +140,7 @@ let
             wrapOptionDocPage (path ++ [ name ]) (go (path ++ [ name ]) opts) false
           else
             let
-              subOpts = getSubOptions opts (path ++ [ name ]);
+              subOpts = getSubOptions opts;
             in
             # If this node is an option with sub-options...
             # Pass wrapOptionDocPage a set containing it and its sub-options.
@@ -144,7 +148,7 @@ let
             if subOpts != { } then
               wrapOptionDocPage (path ++ [ name ]) (
                 (go (path ++ [ name ]) subOpts)
-                // {
+                // lib.optionalAttrs (isVisible opts) {
                   # This is necessary to include the option itself in the docs.
                   # For instance, this helps submodules like "autoCmd" to include their base declaration in the docs.
                   # Though there must be a better, less "hacky" solution than this.
@@ -300,7 +304,7 @@ let
 
     # Attrset of { filePath = renderedDocs; }
     platformOptionsFiles = lib.listToAttrs (
-      builtins.map (
+      map (
         { path, file, ... }:
         {
           name = path;
@@ -331,7 +335,6 @@ pkgs.stdenv.mkDerivation (finalAttrs: {
   buildInputs = [
     pkgs.mdbook
     pkgs.mdbook-alerts
-    pkgs.mdbook-pagetoc
   ];
 
   # Build a source from the fileset containing the following paths,

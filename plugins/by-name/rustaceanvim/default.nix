@@ -1,27 +1,17 @@
 {
   lib,
-  helpers,
   config,
   ...
 }:
-with lib;
 lib.nixvim.plugins.mkNeovimPlugin {
   name = "rustaceanvim";
   description = "A Neovim plugin for Rust development, providing features like LSP support, code navigation, and more.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   dependencies = [ "rust-analyzer" ];
-  imports = [
-    # TODO: added 2025-04-07, remove after 25.05
-    (lib.nixvim.mkRemovedPackageOptionModule {
-      plugin = "godot";
-      packageName = "rust-analyzer";
-      oldPackageName = "rustAnalyzer";
-    })
-  ];
 
-  settingsOptions = import ./settings-options.nix { inherit lib helpers; };
+  settingsOptions = import ./settings-options.nix { inherit lib; };
 
   settingsExample = {
     server = {

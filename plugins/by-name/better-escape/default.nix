@@ -1,28 +1,26 @@
-{
-  lib,
-  helpers,
-  ...
-}:
-with lib;
+{ lib, ... }:
+let
+  inherit (lib) types;
+in
 lib.nixvim.plugins.mkNeovimPlugin {
   name = "better-escape";
   moduleName = "better_escape";
   package = "better-escape-nvim";
   description = "A Neovim plugin to quickly exit insert mode without losing your typed text.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   settingsOptions = {
-    timeout = helpers.defaultNullOpts.mkStrLuaOr types.ints.unsigned "vim.o.timeoutlen" ''
+    timeout = lib.nixvim.defaultNullOpts.mkStrLuaOr types.ints.unsigned "vim.o.timeoutlen" ''
       The time in which the keys must be hit in ms.
       Uses the value of `vim.o.timeoutlen` (`options.timeoutlen` in nixvim) by default.
     '';
 
-    default_mappings = helpers.defaultNullOpts.mkBool true ''
+    default_mappings = lib.nixvim.defaultNullOpts.mkBool true ''
       Whether to enable default key mappings.
     '';
 
-    mappings = helpers.defaultNullOpts.mkAttrsOf' {
+    mappings = lib.nixvim.defaultNullOpts.mkAttrsOf' {
       type = types.anything;
       pluginDefault = {
         i.j = {

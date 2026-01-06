@@ -1,6 +1,6 @@
 { lib, ... }:
-with lib;
 let
+  inherit (lib) types;
   inherit (import ./_helpers.nix lib) mkMappingsOption;
   mkExtension = import ./_mk-extension.nix;
   inherit (lib.nixvim) defaultNullOpts mkNullOrStr;
@@ -15,12 +15,12 @@ mkExtension {
       Custom theme, will use your global theme by default.
     '';
 
-    path = defaultNullOpts.mkStr (lib.nixvim.literalLua "vim.loop.cwd()") ''
+    path = defaultNullOpts.mkStr (lib.nixvim.literalLua "vim.uv.cwd()") ''
       Directory to browse files from.
       `vim.fn.expanded` automatically.
     '';
 
-    cwd = defaultNullOpts.mkStr (lib.nixvim.literalLua "vim.loop.cwd()") ''
+    cwd = defaultNullOpts.mkStr (lib.nixvim.literalLua "vim.uv.cwd()") ''
       Directory to browse folders from.
       `vim.fn.expanded` automatically.
     '';

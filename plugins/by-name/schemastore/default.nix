@@ -1,16 +1,22 @@
 {
   lib,
-  helpers,
   config,
   ...
 }:
-with lib;
+let
+  inherit (lib)
+    types
+    mkOption
+    mkIf
+    mkDefault
+    ;
+in
 lib.nixvim.plugins.mkVimPlugin {
   name = "schemastore";
   package = "SchemaStore-nvim";
   description = "A Neovim plugin that provides the SchemaStore catalog for use with jsonls and yamlls.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   extraOptions =
     let
@@ -22,10 +28,10 @@ lib.nixvim.plugins.mkVimPlugin {
             description = "The name of the schema.";
           };
 
-          description = helpers.mkNullOrStr "A description for this schema.";
+          description = lib.nixvim.mkNullOrStr "A description for this schema.";
 
           fileMatch =
-            helpers.mkNullOrOption (with lib.types; maybeRaw (either str (listOf (maybeRaw str))))
+            lib.nixvim.mkNullOrOption (with lib.types; maybeRaw (either str (listOf (maybeRaw str))))
               ''
                 Which filename to match against for this schema.
               '';
@@ -38,7 +44,7 @@ lib.nixvim.plugins.mkVimPlugin {
       };
 
       schemaOpts = {
-        select = helpers.defaultNullOpts.mkListOf types.str [ ] ''
+        select = lib.nixvim.defaultNullOpts.mkListOf types.str [ ] ''
           A list of strings representing the names of schemas to select.
           If this option is not present, all schemas are returned.
           If it is present, only the selected schemas are returned.
@@ -47,21 +53,21 @@ lib.nixvim.plugins.mkVimPlugin {
           See the [schema catalog](https://github.com/SchemaStore/schemastore/blob/master/src/api/json/catalog.json).
         '';
 
-        ignore = helpers.defaultNullOpts.mkListOf types.str [ ] ''
+        ignore = lib.nixvim.defaultNullOpts.mkListOf types.str [ ] ''
           A list of strings representing the names of schemas to ignore.
           `select` and `ignore` are mutually exclusive.
 
           See the [schema catalog](https://github.com/SchemaStore/schemastore/blob/master/src/api/json/catalog.json).
         '';
 
-        replace = helpers.defaultNullOpts.mkAttrsOf schemaEntry { } ''
+        replace = lib.nixvim.defaultNullOpts.mkAttrsOf schemaEntry { } ''
           An attrs of elements representing schemas to replace with a custom schema.
 
           The string key is the name of the schema to replace, the table value is the schema definition.
           If a schema with the given name isn't found, the custom schema will not be returned.
         '';
 
-        extra = helpers.defaultNullOpts.mkListOf schemaEntry [ ] ''
+        extra = lib.nixvim.defaultNullOpts.mkListOf schemaEntry [ ] ''
           Additional schemas to include.
         '';
       };
@@ -75,7 +81,7 @@ lib.nixvim.plugins.mkVimPlugin {
           description = "Whether to enable the json schemas in jsonls.";
         };
 
-        settings = helpers.mkSettingsOption {
+        settings = lib.nixvim.mkSettingsOption {
           options = schemaOpts;
           description = "Options supplied to the `require('schemastore').json.schemas` function.";
           example = {
@@ -114,7 +120,7 @@ lib.nixvim.plugins.mkVimPlugin {
           description = "Whether to enable the yaml schemas in yamlls.";
         };
 
-        settings = helpers.mkSettingsOption {
+        settings = lib.nixvim.mkSettingsOption {
           options = schemaOpts;
           description = "Options supplied to the `require('schemastore').yaml.schemas` function.";
         };

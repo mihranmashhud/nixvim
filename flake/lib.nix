@@ -3,21 +3,18 @@
   config,
   lib,
   withSystem,
+  inputs,
   ...
 }:
 {
-  # Expose lib as a flake-parts module arg
-  _module.args = {
-    helpers = self.lib.nixvim;
-  };
-
   # Public `lib` flake output
   flake.lib = {
-    nixvim = lib.makeOverridable (import ../lib) {
-      inherit lib;
-      flake = self;
+    nixvim = lib.makeOverridable ({ lib }: (lib.extend self.lib.overlay).nixvim) {
+      # NOTE: Use the lib from nixpkgs pin to prevent a dependency
+      # on pinning the flake-parts nixpkgs-lib to the nixpkgs pin
+      inherit (inputs.nixpkgs) lib;
     };
-    overlay = lib.makeOverridable (import ../lib/overlay.nix) {
+    overlay = import ../lib/overlay.nix {
       flake = self;
     };
     # Top-top-level aliases
@@ -33,9 +30,6 @@
         check = pkgs.callPackage ../lib/tests.nix {
           inherit lib self system;
         };
-
-        # NOTE: no longer needs to be per-system
-        helpers = lib.warn "nixvim: `<nixvim>.lib.${system}.helpers` has been moved to `<nixvim>.lib.nixvim` and no longer depends on a specific system" self.lib.nixvim;
       }
     )
   );

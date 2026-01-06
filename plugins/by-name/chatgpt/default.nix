@@ -1,37 +1,24 @@
-{
-  lib,
-  helpers,
-  ...
-}:
-with lib;
+{ lib, ... }:
 lib.nixvim.plugins.mkNeovimPlugin {
   name = "chatgpt";
   package = "ChatGPT-nvim";
   description = "Effortless Natural Language Generation with OpenAI's ChatGPT API";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   dependencies = [ "curl" ];
 
-  # TODO: added 2025-04-06, remove after 25.05
-  imports = [
-    (lib.nixvim.mkRemovedPackageOptionModule {
-      plugin = "chatgpt";
-      packageName = "curl";
-    })
-  ];
-
   settingsOptions = {
-    api_key_cmd = helpers.defaultNullOpts.mkStr null ''
+    api_key_cmd = lib.nixvim.defaultNullOpts.mkStr null ''
       The path and arguments to an executable that returns the API key via stdout.
     '';
 
-    yank_register = helpers.defaultNullOpts.mkStr "+" ''
+    yank_register = lib.nixvim.defaultNullOpts.mkStr "+" ''
       Which register to use for copying.
     '';
 
-    extra_curl_params = helpers.defaultNullOpts.mkListOf' {
-      type = types.str;
+    extra_curl_params = lib.nixvim.defaultNullOpts.mkListOf' {
+      type = lib.types.str;
       pluginDefault = null;
       description = ''
         Custom cURL parameters can be passed using this option.
@@ -43,7 +30,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
       ];
     };
 
-    show_line_numbers = helpers.defaultNullOpts.mkBool true ''
+    show_line_numbers = lib.nixvim.defaultNullOpts.mkBool true ''
       Whether to show line numbers in the ChatGPT window.
     '';
   };

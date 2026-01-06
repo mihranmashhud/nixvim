@@ -546,6 +546,16 @@ let
         "Nixvim (single-element): Trailing whitespaces"
       ];
     };
+
+    buildNixvimWith_hasExpectedArgs = {
+      expr = lib.functionArgs lib.nixvim.modules.buildNixvimWith;
+      expected = lib.functionArgs lib.nixvim.modules.evalNixvim;
+    };
+
+    testNixvimWith_hasExpectedArgs = {
+      expr = lib.functionArgs lib.nixvim.modules.testNixvimWith;
+      expected = lib.functionArgs lib.nixvim.modules.evalNixvim;
+    };
   };
 in
 if results == [ ] then
@@ -554,7 +564,7 @@ else
   runCommandLocal "lib-tests-failure"
     {
       results = lib.concatStringsSep "\n" (
-        builtins.map (result: ''
+        map (result: ''
           ${result.name}:
             expected: ${lib.generators.toPretty { } result.expected}
             result: ${lib.generators.toPretty { } result.result}

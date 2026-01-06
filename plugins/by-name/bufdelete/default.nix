@@ -1,15 +1,10 @@
-{
-  helpers,
-  lib,
-  ...
-}:
-with lib;
+{ lib, ... }:
 lib.nixvim.plugins.mkVimPlugin {
   name = "bufdelete";
   package = "bufdelete-nvim";
   globalPrefix = "bufdelete_";
 
-  maintainers = [ maintainers.MattSturgeon ];
+  maintainers = [ lib.maintainers.MattSturgeon ];
 
   description = ''
     Delete Neovim buffers without losing window layout.
@@ -52,7 +47,7 @@ lib.nixvim.plugins.mkVimPlugin {
   '';
 
   settingsOptions = {
-    buf_filter = helpers.defaultNullOpts.mkLuaFn null ''
+    buf_filter = lib.nixvim.defaultNullOpts.mkLuaFn null ''
       Function that determines buffers that bufdelete.nvim can switch to,
       instead of the default behavior of switching to any buffer.
 

@@ -10,7 +10,11 @@ let
   cfg = config.dependencies;
 
   mkDependencyOption = name: properties: {
-    enable = lib.mkEnableOption "Add ${name} to dependencies.";
+    enable = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "Whether to add ${name} to dependencies.";
+    };
 
     package =
       lib.mkPackageOption pkgs name properties
@@ -93,7 +97,7 @@ in
     extraPackages = lib.pipe cfg [
       builtins.attrValues
       (builtins.filter (p: p.enable))
-      (builtins.map (p: p.package))
+      (map (p: p.package))
     ];
 
     __depPackages = {
@@ -128,6 +132,7 @@ in
       glow.default = "glow";
       go.default = "go";
       godot.default = "godot_4";
+      grep.default = "gnugrep";
       gzip.default = "gzip";
       imagemagick.default = "imagemagick";
       jupytext.default = [
@@ -152,6 +157,7 @@ in
       sd.default = "sd";
       sed.default = "gnused";
       skim.default = "skim";
+      television.default = "television";
       texpresso.default = "texpresso";
       tinymist.default = "tinymist";
       tmux.default = "tmux";

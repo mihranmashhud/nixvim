@@ -1,8 +1,4 @@
-{
-  lib,
-  helpers,
-  ...
-}:
+{ lib, ... }:
 let
   # The keys are the option name in nixvim (under plugins.julia-cell.keymaps)
   # cmd: Such that the mapping action is ':JuliaCell${cmd}<CR>'
@@ -34,18 +30,17 @@ let
     };
   };
 in
-with lib;
 lib.nixvim.plugins.mkVimPlugin {
   name = "julia-cell";
   package = "vim-julia-cell";
   globalPrefix = "julia_cell_";
   description = "A Vim plugin for executing Julia code cells.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   settingsOptions = {
     delimit_cells_by =
-      helpers.defaultNullOpts.mkEnumFirstDefault
+      lib.nixvim.defaultNullOpts.mkEnumFirstDefault
         [
           "marks"
           "tags"
@@ -54,28 +49,30 @@ lib.nixvim.plugins.mkVimPlugin {
           Specifies if cells are delimited by 'marks' or 'tags'.
         '';
 
-    tag = helpers.defaultNullOpts.mkStr "##" "Specifies the tag format.";
+    tag = lib.nixvim.defaultNullOpts.mkStr "##" "Specifies the tag format.";
   };
 
   extraOptions = {
     keymaps = {
-      silent = mkOption {
-        type = types.bool;
+      silent = lib.mkOption {
+        type = lib.types.bool;
         description = "Whether julia-cell keymaps should be silent";
         default = false;
       };
     }
-    // (mapAttrs (name: value: helpers.mkNullOrOption types.str "Keymap for ${value.desc}.") mappings);
+    // (lib.mapAttrs (
+      name: value: lib.nixvim.mkNullOrOption lib.types.str "Keymap for ${value.desc}."
+    ) mappings);
   };
 
   extraConfig = cfg: {
-    keymaps = flatten (
-      mapAttrsToList (
+    keymaps = lib.flatten (
+      lib.mapAttrsToList (
         name: value:
         let
           key = cfg.keymaps.${name};
         in
-        optional (key != null) {
+        lib.optional (key != null) {
           mode = "n";
           inherit key;
           action = ":JuliaCell${value.cmd}<CR>";

@@ -1,21 +1,19 @@
 {
   lib,
-  helpers,
   config,
   ...
 }:
-with lib;
 lib.nixvim.plugins.mkNeovimPlugin {
   name = "ltex-extra";
   package = "ltex_extra-nvim";
   description = "LTeX_extra is a companion plugin for LTeX language server.";
 
-  maintainers = [ maintainers.loicreynier ];
+  maintainers = [ lib.maintainers.loicreynier ];
 
   callSetup = false;
 
   settingsOptions = {
-    path = helpers.defaultNullOpts.mkStr "" ''
+    path = lib.nixvim.defaultNullOpts.mkStr "" ''
       Path (relative to project root) to load external files from.
 
       Commonly used values are:
@@ -23,16 +21,16 @@ lib.nixvim.plugins.mkNeovimPlugin {
       - `.vscode` for compatibility with projects using the associated VS Code extension.
     '';
 
-    init_check = helpers.defaultNullOpts.mkBool true ''
+    init_check = lib.nixvim.defaultNullOpts.mkBool true ''
       Whether to load dictionaries on startup.
     '';
 
-    load_langs = helpers.defaultNullOpts.mkListOf types.str [ "en-US" ] ''
+    load_langs = lib.nixvim.defaultNullOpts.mkListOf lib.types.str [ "en-US" ] ''
       Languages for witch dicionnaries will be loaded.
       See `plugins.lsp.servers.ltex.languages` for possible values.
     '';
 
-    log_level = helpers.defaultNullOpts.mkEnumFirstDefault [
+    log_level = lib.nixvim.defaultNullOpts.mkEnumFirstDefault [
       "none"
       "trace"
       "debug"

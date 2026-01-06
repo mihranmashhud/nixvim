@@ -14,14 +14,6 @@ lib.nixvim.plugins.mkNeovimPlugin {
 
   maintainers = [ lib.maintainers.GaetanLepage ];
 
-  # TODO: option deprecations added 2025-03-20. Remove after 25.05
-  # TODO: curlPackage and ueberzugPackage deprecations added 2025-04-06. Remove after 25.05
-  inherit (import ./deprecations.nix lib)
-    deprecateExtraOptions
-    optionsRenamedToSettings
-    imports
-    ;
-
   settingsOptions = {
     backend =
       defaultNullOpts.mkEnumFirstDefault
@@ -41,7 +33,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
             - ImageMagick is required for Sixel encoding
 
           > [!Note]
-          > When choosing the `"ueberzug"` backend, nixvim will automatically add `ueberzugpp` as a dependency.
+          > When choosing the `"ueberzug"` backend, Nixvim will automatically add `ueberzugpp` as a dependency.
           > Set `ueberzugPackage = null` to disable this behavior.
         '';
 

@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs }:
 {
   empty = {
     plugins.gitgutter.enable = true;
@@ -15,7 +15,6 @@
         diff_args = "";
         diff_relative_to = "index";
         diff_base = "";
-        grep = "grep";
         signs = true;
         highlight_lines = false;
         highlight_linenrs = false;
@@ -63,31 +62,13 @@
     };
   };
 
-  grep-command =
-    { config, ... }:
-    {
-      plugins.gitgutter = {
-        enable = true;
-        grepPackage = pkgs.gnugrep;
-      };
-      assertions = [
-        {
-          assertion =
-            config.extraPackages != [ ] && lib.any (x: x.pname or null == "gnugrep") config.extraPackages;
-          message = "gnugrep wasn't found when it was expected";
-        }
-      ];
-    };
-
   no-packages =
     { config, ... }:
     {
       plugins.gitgutter = {
         enable = true;
-        grepPackage = null;
         settings = {
           git_executable = lib.getExe pkgs.git;
-          grep = lib.getExe pkgs.gnugrep;
         };
       };
 

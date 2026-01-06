@@ -1,12 +1,12 @@
 {
   pkgs,
-  helpers,
   lib,
   linkFarm,
   self, # The flake instance
-  system ? pkgs.stdenv.hostPlatform.system,
 }:
 let
+  inherit (pkgs.stdenv.hostPlatform) system;
+  helpers = self.lib.nixvim;
 
   # Use a single common instance of nixpkgs, with allowUnfree
   # Having a single shared instance should speed up tests a little

@@ -53,13 +53,6 @@ let
       pluginName = "cmp-fish";
       sourceName = "fish";
 
-      imports = [
-        # TODO: added 2025-04-07, remove after 25.05
-        (lib.nixvim.mkRemovedPackageOptionModule {
-          plugin = "cmp-fish";
-          packageName = "fish";
-        })
-      ];
       extraConfig = {
         dependencies.fish.enable = lib.mkDefault true;
       };
@@ -181,7 +174,7 @@ let
   mkCmpSourcePlugin = import ./_mk-cmp-plugin.nix {
     inherit lib pkgs;
   };
-  pluginModules = builtins.map mkCmpSourcePlugin sources;
+  pluginModules = map mkCmpSourcePlugin sources;
 in
 {
   # For extra cmp plugins

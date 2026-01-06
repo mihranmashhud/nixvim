@@ -96,6 +96,12 @@
     githubId = 1176328;
     name = "Alison Jenkins";
   };
+  arne-zillhardt = {
+    email = "arne@zillhardt.com";
+    github = "Arne-Zillhardt";
+    githubId = 94059017;
+    name = "Arne Zillhardt";
+  };
   b3nb5n = {
     email = "benbaldwin000@gmail.com";
     github = "b3nb5n";
@@ -113,6 +119,12 @@
     github = "elythh";
     githubId = 50964650;
     name = "gwen";
+  };
+  fwastring = {
+    email = "fredrik@wastring.com";
+    github = "fwastring";
+    githubId = 25203388;
+    name = "Fredrik Wastring";
   };
   jalil-salame = {
     email = "jalil.salame@gmail.com";

@@ -91,14 +91,18 @@ rec {
     };
 
     options.timeout = lib.nixvim.defaultNullOpts.mkInt 5000 ''
-      Max amount of time in ms to wait between spaning the executable and connecting to the pipe.
+      Max amount of time in ms to wait between spanning the executable and connecting to the pipe.
       This gives the executable time to create the pipe
     '';
   };
 
   mkAdapterOption =
     name: type:
-    mkNullOrOption (with types; attrsOf (either str type)) ''
+    let
+      # TODO: Added 2025-12-11 (26.05)
+      strToRawLua = lib.nixvim.deprecation.transitionType types.str lib.nixvim.mkRaw types.rawLua;
+    in
+    mkNullOrOption (with types; attrsOf (either strToRawLua type)) ''
       Debug adapters of `${name}` type.
       The adapters can also be set to a function which takes three arguments:
 
@@ -150,8 +154,8 @@ rec {
     type: adapters:
     lib.mapAttrs (
       _: adapter:
-      if builtins.isString adapter then
-        lib.nixvim.mkRaw adapter
+      if lib.types.isRawType adapter then
+        adapter
       else
         lib.filterAttrs (n: _: n != "enrichConfig") (
           adapter

@@ -10,14 +10,6 @@ lib.nixvim.plugins.mkNeovimPlugin {
 
   maintainers = [ lib.maintainers.khaneliman ];
 
-  imports = [
-    # TODO: added 2025-04-06, remove after 25.05
-    (lib.nixvim.mkRemovedPackageOptionModule {
-      plugin = "lualine";
-      packageName = "git";
-    })
-  ];
-
   dependencies = [ "git" ];
 
   settingsOptions =
@@ -299,8 +291,8 @@ lib.nixvim.plugins.mkNeovimPlugin {
           __unkeyed-1.__raw = ''
             function()
                 local msg = ""
-                local buf_ft = vim.api.nvim_buf_get_option(0, 'filetype')
-                local clients = vim.lsp.get_active_clients()
+                local buf_ft = vim.bo[0].filetype
+                local clients = vim.lsp.get_clients({ bufnr = 0 })
                 if next(clients) == nil then
                     return msg
                 end

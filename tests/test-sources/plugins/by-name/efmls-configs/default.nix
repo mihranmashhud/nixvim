@@ -6,12 +6,12 @@
   all =
     { options, ... }:
     let
-      inherit (options.plugins.efmls-configs) setup;
+      inherit (options.plugins.efmls-configs) languages;
 
       # toolOptions is an attrsets of the form:
       # { <lang> = { linter = tools; formatter = tools; }; }
       # Where tools is the option type representing the valid tools for this language
-      toolOptions = builtins.removeAttrs (setup.type.getSubOptions setup.loc) [
+      toolOptions = removeAttrs (languages.type.getSubOptions languages.loc) [
         "_freeformOptions"
         "_module"
 
@@ -21,7 +21,12 @@
         "JSON"
       ];
 
-      brokenTools = [ ];
+      brokenTools = [
+        # 2025-12-24: phpPackages.php-codesniffer is broken
+        # https://github.com/NixOS/nixpkgs/pull/459254#issuecomment-3689578764
+        "phpcbf"
+        "phpcs"
+      ];
 
       # TODO: respect unpackaged from generated
       unpackaged = [
@@ -81,7 +86,7 @@
         #          linter = [<all valid linters for lang>];
         #          formatter = [<all valid formatters for lang>];
         #       };}
-        setup = builtins.mapAttrs (_: builtins.mapAttrs (_: toolsFromOptions)) toolOptions;
+        languages = builtins.mapAttrs (_: builtins.mapAttrs (_: toolsFromOptions)) toolOptions;
       };
     };
 
@@ -97,7 +102,7 @@
     plugins.efmls-configs = {
       enable = true;
 
-      setup = {
+      languages = {
         # Setup for all languages
         all = {
           linter = "vale";

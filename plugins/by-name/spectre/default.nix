@@ -1,31 +1,17 @@
 {
   lib,
   config,
-  helpers,
   ...
 }:
-with lib;
+let
+  inherit (lib) mkOption types;
+in
 lib.nixvim.plugins.mkNeovimPlugin {
   name = "spectre";
   package = "nvim-spectre";
   description = "A search panel for neovim.";
 
-  maintainers = [ maintainers.GaetanLepage ];
-
-  imports = [
-    # TODO: added 2025-04-07, remove after 25.05
-    (lib.nixvim.mkRemovedPackageOptionModule {
-      plugin = "spectre";
-      packageName = "ripgrep";
-      oldPackageName = "find";
-    })
-    (lib.mkRemovedOptionModule [ "plugins" "spectre" "replacePackage" ] ''
-      If you have set `plugins.spectre.settings.default.find.cmd` to "sed" (or "sd" respectively), Nixvim will automatically enable `dependencies.sed.enable` (or `sd` respectively).
-
-      - If you want to disable automatic installation of the replace tool, set `dependencies.s[e]d.enable` to `false`.
-      - If you want to override which package is installed by Nixvim, set the `dependencies.s[e]d.package` option.
-    '')
-  ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   dependencies =
     let
@@ -50,7 +36,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
     let
       mkEngineOption =
         type:
-        helpers.mkNullOrOption
+        lib.nixvim.mkNullOrOption
           (
             with types;
             attrsOf (submodule {
@@ -61,11 +47,11 @@ lib.nixvim.plugins.mkNeovimPlugin {
                   description = "Executable to run.";
                 };
 
-                args = helpers.defaultNullOpts.mkListOf types.str [ ] ''
+                args = lib.nixvim.defaultNullOpts.mkListOf types.str [ ] ''
                   List of arguments to provide to the engine.
                 '';
 
-                options = helpers.defaultNullOpts.mkAttrsOf (types.submodule {
+                options = lib.nixvim.defaultNullOpts.mkAttrsOf (types.submodule {
                   options = {
                     value = mkOption {
                       type = types.str;
@@ -79,7 +65,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
                       description = "The option icon.";
                     };
 
-                    desc = helpers.mkNullOrStr ''
+                    desc = lib.nixvim.mkNullOrStr ''
                       The description for this option.
                     '';
                   };
@@ -94,31 +80,31 @@ lib.nixvim.plugins.mkNeovimPlugin {
           '';
     in
     {
-      color_devicons = helpers.defaultNullOpts.mkBool true ''
+      color_devicons = lib.nixvim.defaultNullOpts.mkBool true ''
         Whether to enable color devicons.
       '';
 
-      open_cmd = helpers.defaultNullOpts.mkStr "vnew" ''
+      open_cmd = lib.nixvim.defaultNullOpts.mkStr "vnew" ''
         The open command.
       '';
 
-      live_update = helpers.defaultNullOpts.mkBool false ''
+      live_update = lib.nixvim.defaultNullOpts.mkBool false ''
         Auto execute search again when you write to any file in vim.
       '';
 
-      lnum_for_results = helpers.defaultNullOpts.mkBool false ''
+      lnum_for_results = lib.nixvim.defaultNullOpts.mkBool false ''
         Show line number for search/replace results.
       '';
 
-      line_sep_start = helpers.defaultNullOpts.mkStr "┌──────────────────────────────────────────────────────" "Start of the line separator";
+      line_sep_start = lib.nixvim.defaultNullOpts.mkStr "┌──────────────────────────────────────────────────────" "Start of the line separator";
 
-      result_padding = helpers.defaultNullOpts.mkStr "│  " ''
+      result_padding = lib.nixvim.defaultNullOpts.mkStr "│  " ''
         Result padding string.
       '';
 
-      line_sep = helpers.defaultNullOpts.mkStr "└──────────────────────────────────────────────────────" "Line separator.";
+      line_sep = lib.nixvim.defaultNullOpts.mkStr "└──────────────────────────────────────────────────────" "Line separator.";
 
-      highlight = helpers.defaultNullOpts.mkAttrsOf types.str {
+      highlight = lib.nixvim.defaultNullOpts.mkAttrsOf types.str {
         headers = "SpectreHeader";
         ui = "SpectreBody";
         filename = "SpectreFile";
@@ -129,7 +115,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
       } "Highlight groups.";
 
       mapping =
-        helpers.mkNullOrOption
+        lib.nixvim.mkNullOrOption
           (
             with types;
             attrsOf (submodule {
@@ -145,7 +131,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
                   example = "<cmd>lua require('spectre').tab()<cr>";
                 };
 
-                desc = helpers.mkNullOrStr ''
+                desc = lib.nixvim.mkNullOrStr ''
                   Description for this mapping.
                 '';
               };
@@ -163,39 +149,39 @@ lib.nixvim.plugins.mkNeovimPlugin {
 
       default = {
         find = {
-          cmd = helpers.defaultNullOpts.mkStr "rg" ''
+          cmd = lib.nixvim.defaultNullOpts.mkStr "rg" ''
             Which find engine to use. Pick one from the `find_engine` list.
           '';
 
-          options = helpers.defaultNullOpts.mkListOf types.str [ "ignore-case" ] ''
+          options = lib.nixvim.defaultNullOpts.mkListOf types.str [ "ignore-case" ] ''
             Options to use for this engine.
           '';
         };
 
         replace = {
-          cmd = helpers.defaultNullOpts.mkStr "rg" ''
+          cmd = lib.nixvim.defaultNullOpts.mkStr "rg" ''
             Which find engine to use. Pick one from the `replace_engine` list.
           '';
 
-          options = helpers.defaultNullOpts.mkListOf types.str [ ] ''
+          options = lib.nixvim.defaultNullOpts.mkListOf types.str [ ] ''
             Options to use for this engine.
           '';
         };
       };
 
-      replace_vim_cmd = helpers.defaultNullOpts.mkStr "cdo" ''
+      replace_vim_cmd = lib.nixvim.defaultNullOpts.mkStr "cdo" ''
         The replace command to use within vim.
       '';
 
-      is_open_target_win = helpers.defaultNullOpts.mkBool true ''
+      is_open_target_win = lib.nixvim.defaultNullOpts.mkBool true ''
         Open file on opener window.
       '';
 
-      is_insert_mode = helpers.defaultNullOpts.mkBool false ''
+      is_insert_mode = lib.nixvim.defaultNullOpts.mkBool false ''
         Start open panel in insert mode.
       '';
 
-      is_block_ui_break = helpers.defaultNullOpts.mkBool false ''
+      is_block_ui_break = lib.nixvim.defaultNullOpts.mkBool false ''
         Mapping backspace and enter key to avoid ui break.
       '';
     };

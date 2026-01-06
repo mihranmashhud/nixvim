@@ -1,65 +1,59 @@
-{
-  lib,
-  helpers,
-  ...
-}:
-with lib;
-with lib.nixvim.plugins;
-mkVimPlugin {
+{ lib, ... }:
+lib.nixvim.plugins.mkVimPlugin {
   name = "instant";
   package = "instant-nvim";
   globalPrefix = "instant_";
   description = "A Neovim plugin for collaborative editing.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   settingsOptions = {
-    username = helpers.mkNullOrStr ''
+    username = lib.nixvim.mkNullOrStr ''
       Username.
       Explicitly set to `null` if you do not want this option to be set.
     '';
 
-    only_cwd = helpers.defaultNullOpts.mkBool true ''
+    only_cwd = lib.nixvim.defaultNullOpts.mkBool true ''
       Choose whether to share files only in the current working directory in session mode.
     '';
 
-    cursor_hl_group_user1 = helpers.defaultNullOpts.mkStr "Cursor" ''
+    cursor_hl_group_user1 = lib.nixvim.defaultNullOpts.mkStr "Cursor" ''
       Cursor highlight group for user 1.
     '';
 
-    cursor_hl_group_user2 = helpers.defaultNullOpts.mkStr "Cursor" ''
+    cursor_hl_group_user2 = lib.nixvim.defaultNullOpts.mkStr "Cursor" ''
       Cursor highlight group for user 2.
     '';
 
-    cursor_hl_group_user3 = helpers.defaultNullOpts.mkStr "Cursor" ''
+    cursor_hl_group_user3 = lib.nixvim.defaultNullOpts.mkStr "Cursor" ''
       Cursor highlight group for user 3.
     '';
 
-    cursor_hl_group_user4 = helpers.defaultNullOpts.mkStr "Cursor" ''
+    cursor_hl_group_user4 = lib.nixvim.defaultNullOpts.mkStr "Cursor" ''
       Cursor highlight group for user 4.
     '';
 
-    cursor_hl_group_default = helpers.defaultNullOpts.mkStr "Cursor" ''
-      Cursor highlight group for any other userr.
+    cursor_hl_group_default = lib.nixvim.defaultNullOpts.mkStr "Cursor" ''
+      Cursor highlight group for any other user.
     '';
 
-    name_hl_group_user1 = helpers.defaultNullOpts.mkStr "CursorLineNr" ''
+    name_hl_group_user1 = lib.nixvim.defaultNullOpts.mkStr "CursorLineNr" ''
       Virtual text highlight group for user 1.
     '';
 
-    name_hl_group_user2 = helpers.defaultNullOpts.mkStr "CursorLineNr" ''
+    name_hl_group_user2 = lib.nixvim.defaultNullOpts.mkStr "CursorLineNr" ''
       Virtual text highlight group for user 2.
     '';
 
-    name_hl_group_user3 = helpers.defaultNullOpts.mkStr "CursorLineNr" ''
+    name_hl_group_user3 = lib.nixvim.defaultNullOpts.mkStr "CursorLineNr" ''
       Virtual text highlight group for user 3.
     '';
 
-    name_hl_group_user4 = helpers.defaultNullOpts.mkStr "CursorLineNr" ''
+    name_hl_group_user4 = lib.nixvim.defaultNullOpts.mkStr "CursorLineNr" ''
       Virtual text highlight group for user 4.
     '';
 
-    name_hl_group_default = helpers.defaultNullOpts.mkStr "CursorLineNr" ''
+    name_hl_group_default = lib.nixvim.defaultNullOpts.mkStr "CursorLineNr" ''
       Virtual text highlight group for any other user.
     '';
   };

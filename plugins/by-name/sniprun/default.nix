@@ -1,33 +1,31 @@
-{
-  lib,
-  helpers,
-  ...
-}:
-with lib;
+{ lib, ... }:
+let
+  inherit (lib) types literalExpression;
+in
 lib.nixvim.plugins.mkNeovimPlugin {
   name = "sniprun";
   description = "A neovim plugin to run lines/blocs of code.";
 
-  maintainers = with maintainers; [
+  maintainers = with lib.maintainers; [
     traxys
     MattSturgeon
   ];
 
   # https://michaelb.github.io/sniprun/sources/README.html#configuration
   settingsOptions = {
-    selected_interpreters = helpers.defaultNullOpts.mkListOf types.str [ ] ''
+    selected_interpreters = lib.nixvim.defaultNullOpts.mkListOf types.str [ ] ''
       Use those instead of the default for the current filetype.
     '';
 
-    repl_enable = helpers.defaultNullOpts.mkListOf types.str [ ] ''
+    repl_enable = lib.nixvim.defaultNullOpts.mkListOf types.str [ ] ''
       Enable REPL-like behavior for the given interpreters.
     '';
 
-    repl_disable = helpers.defaultNullOpts.mkListOf types.str [ ] ''
+    repl_disable = lib.nixvim.defaultNullOpts.mkListOf types.str [ ] ''
       Disable REPL-like behavior for the given interpreters.
     '';
 
-    interpreter_options = helpers.defaultNullOpts.mkAttrsOf' {
+    interpreter_options = lib.nixvim.defaultNullOpts.mkAttrsOf' {
       type = types.anything;
       pluginDefault = { };
       description = ''
@@ -51,7 +49,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
       '';
     };
 
-    display = helpers.defaultNullOpts.mkListOf' {
+    display = lib.nixvim.defaultNullOpts.mkListOf' {
       type = types.str;
       pluginDefault = [
         "Classic"
@@ -77,43 +75,43 @@ lib.nixvim.plugins.mkNeovimPlugin {
       '';
     };
 
-    live_display = helpers.defaultNullOpts.mkListOf types.str [
+    live_display = lib.nixvim.defaultNullOpts.mkListOf types.str [
       "VirtualTextOk"
     ] "Display modes used in `live_mode`.";
 
     display_options = {
-      terminal_scrollback = helpers.defaultNullOpts.mkUnsignedInt (lib.nixvim.literalLua "vim.o.scrollback") ''
+      terminal_scrollback = lib.nixvim.defaultNullOpts.mkUnsignedInt (lib.nixvim.literalLua "vim.o.scrollback") ''
         Change terminal display scrollback lines.
       '';
 
-      terminal_line_number = helpers.defaultNullOpts.mkBool false ''
+      terminal_line_number = lib.nixvim.defaultNullOpts.mkBool false ''
         Whether show line number in terminal window.
       '';
 
-      terminal_signcolumn = helpers.defaultNullOpts.mkBool false ''
+      terminal_signcolumn = lib.nixvim.defaultNullOpts.mkBool false ''
         Whether show signcolumn in terminal window.
       '';
 
-      terminal_position = helpers.defaultNullOpts.mkEnumFirstDefault [
+      terminal_position = lib.nixvim.defaultNullOpts.mkEnumFirstDefault [
         "vertical"
         "horizontal"
       ] "Terminal split position.";
 
-      terminal_width = helpers.defaultNullOpts.mkUnsignedInt 45 ''
+      terminal_width = lib.nixvim.defaultNullOpts.mkUnsignedInt 45 ''
         Change the terminal display option width (if vertical).
       '';
 
-      terminal_height = helpers.defaultNullOpts.mkUnsignedInt 20 ''
+      terminal_height = lib.nixvim.defaultNullOpts.mkUnsignedInt 20 ''
         Change the terminal display option height (if horizontal).
       '';
 
-      notification_timeout = helpers.defaultNullOpts.mkUnsignedInt 5 ''
+      notification_timeout = lib.nixvim.defaultNullOpts.mkUnsignedInt 5 ''
         Timeout for nvim_notify output.
       '';
     };
 
     show_no_output =
-      helpers.defaultNullOpts.mkListOf types.str
+      lib.nixvim.defaultNullOpts.mkListOf types.str
         [
           "Classic"
           "TempFloatingWindow"
@@ -135,20 +133,20 @@ lib.nixvim.plugins.mkNeovimPlugin {
             ctermfg ? "",
           }:
           {
-            bg = helpers.defaultNullOpts.mkStr fg "Background color";
-            fg = helpers.defaultNullOpts.mkStr bg "Foreground color";
-            ctermbg = helpers.defaultNullOpts.mkStr ctermbg "Foreground color";
-            ctermfg = helpers.defaultNullOpts.mkStr ctermfg "Foreground color";
+            bg = lib.nixvim.defaultNullOpts.mkStr fg "Background color";
+            fg = lib.nixvim.defaultNullOpts.mkStr bg "Foreground color";
+            ctermbg = lib.nixvim.defaultNullOpts.mkStr ctermbg "Foreground color";
+            ctermfg = lib.nixvim.defaultNullOpts.mkStr ctermfg "Foreground color";
           };
       in
-      helpers.defaultNullOpts.mkNullable' {
+      lib.nixvim.defaultNullOpts.mkNullable' {
         description = ''
           Customize highlight groups (setting this overrides colorscheme)
           any parameters of `nvim_set_hl()` can be passed as-is.
         '';
         type = types.submodule {
           freeformType = types.attrsOf types.anything;
-          options = mapAttrs (optionName: colorOption) {
+          options = lib.mapAttrs (optionName: colorOption) {
             SniprunVirtualTextOk = {
               bg = "#66eeff";
               fg = "#000000";
@@ -173,18 +171,18 @@ lib.nixvim.plugins.mkNeovimPlugin {
         };
       };
 
-    live_mode_toggle = helpers.defaultNullOpts.mkStr "off" ''
+    live_mode_toggle = lib.nixvim.defaultNullOpts.mkStr "off" ''
       Live mode toggle, see [Usage - Running] for more info.
 
       [Usage - Running]: https://michaelb.github.io/sniprun/sources/README.html#running
     '';
 
-    inline_messages = helpers.defaultNullOpts.mkBool false ''
+    inline_messages = lib.nixvim.defaultNullOpts.mkBool false ''
       Boolean toggle for a one-line way to display messages
       to workaround sniprun not being able to display anything.
     '';
 
-    borders = helpers.defaultNullOpts.mkEnum [
+    borders = lib.nixvim.defaultNullOpts.mkEnum [
       "none"
       "single"
       "double"

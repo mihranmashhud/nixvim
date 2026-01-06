@@ -129,9 +129,6 @@ rec {
         args // { default = null; };
     in
     rec {
-      # TODO: removed 2024-06-14; remove stub 2024-09-01
-      mkDesc = abort "mkDesc has been removed. Use the `pluginDefault` argument or `lib.nixvim.pluginDefaultText`.";
-
       mkNullable' = args: mkNullOrOption' (processDefaultNullArgs args);
       mkNullable =
         type: pluginDefault: description:
@@ -352,7 +349,7 @@ rec {
           {
             foo_bar = 42;
             hostname = "localhost:8080";
-            callback.__raw = ''
+            callback = lib.nixvim.nestedLiteralLua ''
               function()
                 print('nixvim')
               end

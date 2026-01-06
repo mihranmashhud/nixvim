@@ -1,29 +1,16 @@
-{
-  lib,
-  helpers,
-  ...
-}:
-with lib;
+{ lib, ... }:
 lib.nixvim.plugins.mkNeovimPlugin {
   name = "git-conflict";
   package = "git-conflict-nvim";
   description = "A plugin to visualise and resolve merge conflicts in neovim.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   dependencies = [ "git" ];
 
-  imports = [
-    # TODO: added 2025-04-07, remove after 25.05
-    (lib.nixvim.mkRemovedPackageOptionModule {
-      plugin = "git-conflict";
-      packageName = "git";
-    })
-  ];
-
   settingsOptions = {
     default_mappings =
-      helpers.defaultNullOpts.mkNullable (with types; either bool (attrsOf str)) true
+      lib.nixvim.defaultNullOpts.mkNullable (with lib.types; either bool (attrsOf str)) true
         ''
           This plugin offers default buffer local mappings inside conflicted files.
           This is primarily because applying these mappings only to relevant buffers is impossible
@@ -44,28 +31,28 @@ lib.nixvim.plugins.mkNeovimPlugin {
           ```
         '';
 
-    default_commands = helpers.defaultNullOpts.mkBool true ''
+    default_commands = lib.nixvim.defaultNullOpts.mkBool true ''
       Set to `false` to disable commands created by this plugin.
     '';
 
-    disable_diagnostics = helpers.defaultNullOpts.mkBool false ''
+    disable_diagnostics = lib.nixvim.defaultNullOpts.mkBool false ''
       This will disable the diagnostics in a buffer whilst it is conflicted.
     '';
 
-    list_opener = helpers.defaultNullOpts.mkStr "copen" ''
+    list_opener = lib.nixvim.defaultNullOpts.mkStr "copen" ''
       Command or function to open the conflicts list.
     '';
 
     highlights = {
-      incoming = helpers.defaultNullOpts.mkStr "DiffAdd" ''
+      incoming = lib.nixvim.defaultNullOpts.mkStr "DiffAdd" ''
         Which highlight group to use for incoming changes.
       '';
 
-      current = helpers.defaultNullOpts.mkStr "DiffText" ''
+      current = lib.nixvim.defaultNullOpts.mkStr "DiffText" ''
         Which highlight group to use for current changes.
       '';
 
-      ancestor = helpers.mkNullOrStr ''
+      ancestor = lib.nixvim.mkNullOrStr ''
         Which highlight group to use for ancestor.
 
         Plugin default: `null`

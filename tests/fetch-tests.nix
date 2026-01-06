@@ -1,7 +1,6 @@
 {
   lib,
   pkgs,
-  helpers,
 }:
 let
   # Import a test file into the form { name = ""; file = ""; cases = {}; }
@@ -16,7 +15,11 @@ let
       cases =
         if builtins.isFunction fnOrAttrs then
           # Call the function
-          fnOrAttrs { inherit pkgs lib helpers; }
+          fnOrAttrs (
+            builtins.intersectAttrs (builtins.functionArgs fnOrAttrs) {
+              inherit pkgs lib;
+            }
+          )
         else
           fnOrAttrs;
     };
@@ -24,7 +27,7 @@ let
   # Recurse into all directories, extracting files as we find them.
   # This returns a list of { name; file; cases;  } attrsets.
   fetchTests =
-    path: namespace:
+    testPath: namespace:
     let
       # Handle an entry from readDir
       # - If it is a regular nix file, import its content
@@ -32,7 +35,7 @@ let
       handleEntry =
         name: type:
         let
-          file = /${path}/${name};
+          file = /${testPath}/${name};
         in
         if type == "regular" then
           lib.optional (lib.hasSuffix ".nix" name) (
@@ -43,7 +46,7 @@ let
         else
           fetchTests file (namespace ++ [ name ]);
     in
-    lib.pipe path [
+    lib.pipe testPath [
       builtins.readDir
       (lib.filterAttrs (n: v: v != "symlink"))
       (lib.mapAttrsToList handleEntry)

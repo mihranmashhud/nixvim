@@ -1,11 +1,10 @@
 { config, lib, ... }:
-with lib;
 let
+  inherit (lib) mkOption types;
   inherit (lib.nixvim)
     defaultNullOpts
     keymaps
     mkNullOrOption
-    mkNullOrOption'
     mkNullOrStr
     ;
   keymapsActions = {
@@ -45,25 +44,44 @@ let
     orderByLanguage = "OrderByLanguage";
     orderByWindowNumber = "OrderByWindowNumber";
   };
+
+  # As of 2025-11-21, `either` supports `valueMeta`, while `nullOr` does not.
+  # The `lua` deprecation warning in `modules/keymaps.nix` requires `valueMeta`,
+  # so re-implement `nullOr` using `types.either` as a workaround.
+  #
+  # TODO: Remove with the warning, or once `nullOr` supports v2 check and merge.
+  v2NullOr =
+    type:
+    let
+      v1 = lib.types.nullOr type;
+      v2 = lib.types.either (lib.types.enum [ null ]) type;
+    in
+    v2
+    // {
+      inherit (v1) description descriptionClass getSubOptions;
+    };
 in
 lib.nixvim.plugins.mkNeovimPlugin {
   name = "barbar";
   package = "barbar-nvim";
   description = "A neovim tabline plugin.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   extraOptions = {
-    keymaps = mapAttrs (
+    keymaps = lib.mapAttrs (
       optionName: funcName:
-      mkNullOrOption' {
-        type = keymaps.mkMapOptionSubmodule {
-          defaults = {
-            mode = "n";
-            action = "<Cmd>Buffer${funcName}<CR>";
-          };
-          lua = true;
-        };
+      mkOption {
+        type = v2NullOr (
+          keymaps.mkMapOptionSubmodule {
+            defaults = {
+              mode = "n";
+              action = "<Cmd>Buffer${funcName}<CR>";
+            };
+            lua = true;
+          }
+        );
+        default = null;
         apply = v: if v == null then null else keymaps.removeDeprecatedMapAttrs v;
         description = "Keymap for function Buffer${funcName}";
       }
@@ -72,7 +90,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
 
   extraConfig = cfg: {
     # TODO: added 2024-09-20 remove after 24.11
-    plugins.web-devicons = mkIf (
+    plugins.web-devicons = lib.mkIf (
       !(
         (
           config.plugins.mini.enable
@@ -81,11 +99,11 @@ lib.nixvim.plugins.mkNeovimPlugin {
         )
         || (config.plugins.mini-icons.enable && config.plugins.mini-icons.mockDevIcons)
       )
-    ) { enable = mkOverride 1490 true; };
+    ) { enable = lib.mkOverride 1490 true; };
 
-    keymaps = filter (keymap: keymap != null) (
+    keymaps = lib.filter (keymap: keymap != null) (
       # TODO: switch to `attrValues cfg.keymaps` when removing the deprecation warnings above:
-      attrValues (filterAttrs (n: v: n != "silent") cfg.keymaps)
+      lib.attrValues (lib.filterAttrs (n: v: n != "silent") cfg.keymaps)
     );
   };
 
@@ -242,18 +260,18 @@ lib.nixvim.plugins.mkNeovimPlugin {
 
           The keys will be automatically translated to raw lua:
           ```nix
-            {
-              "vim.diagnostic.severity.INFO".enabled = true;
-              "vim.diagnostic.severity.WARN".enabled = true;
-            }
+          {
+            "vim.diagnostic.severity.INFO".enabled = true;
+            "vim.diagnostic.severity.WARN".enabled = true;
+          }
           ```
           will result in the following lua:
           ```lua
-            {
-              -- Note the table keys are not string literals:
-              [vim.diagnostic.severity.INFO] = { ['enabled'] = true },
-              [vim.diagnostic.severity.WARN] = { ['enabled'] = true },
-            }
+          {
+            -- Note the table keys are not string literals:
+            [vim.diagnostic.severity.INFO] = { ['enabled'] = true },
+            [vim.diagnostic.severity.WARN] = { ['enabled'] = true },
+          }
           ```
         '';
       };

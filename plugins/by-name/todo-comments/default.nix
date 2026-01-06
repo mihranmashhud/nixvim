@@ -3,9 +3,8 @@
   config,
   ...
 }:
-with lib;
 let
-  inherit (lib) types;
+  inherit (lib) types mkOption optionalString;
   inherit (lib.nixvim)
     defaultNullOpts
     keymaps
@@ -22,14 +21,6 @@ lib.nixvim.plugins.mkNeovimPlugin {
   maintainers = [ lib.maintainers.khaneliman ];
 
   dependencies = [ "ripgrep" ];
-
-  imports = [
-    # TODO: added 2025-04-07, remove after 25.05
-    (lib.nixvim.mkRemovedPackageOptionModule {
-      plugin = "todo-comments";
-      packageName = "ripgrep";
-    })
-  ];
 
   settingsOptions = {
     signs = defaultNullOpts.mkBool true "Show icons in the signs column.";
@@ -272,7 +263,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
 
   extraOptions = {
     keymaps =
-      mapAttrs
+      lib.mapAttrs
         (
           optionName: action:
           mkNullOrOption' {
@@ -335,8 +326,8 @@ lib.nixvim.plugins.mkNeovimPlugin {
     ];
 
     keymaps = lib.pipe cfg.keymaps [
-      (filterAttrs (n: keymap: keymap != null && keymap.key != null))
-      (mapAttrsToList (
+      (lib.filterAttrs (n: keymap: keymap != null && keymap.key != null))
+      (lib.mapAttrsToList (
         name: keymap: {
           inherit (keymap) key mode options;
           action =
@@ -344,7 +335,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
               cwd = optionalString (keymap.cwd != null) " cwd=${keymap.cwd}";
               keywords = optionalString (
                 keymap.keywords != null && keymap.keywords != [ ]
-              ) " keywords=${concatStringsSep "," keymap.keywords}";
+              ) " keywords=${lib.concatStringsSep "," keymap.keywords}";
             in
             "<cmd>${keymap.action}${cwd}${keywords}<cr>";
         }

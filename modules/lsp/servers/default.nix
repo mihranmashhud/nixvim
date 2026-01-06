@@ -32,7 +32,7 @@ let
   # Create a server option
   # Used below for the `lsp.servers.*` options
   mkServerOption =
-    name: args:
+    { name, ... }@args:
     let
       homepage = lib.pipe options.lsp.servers [
         # Get suboptions of `lsp.servers`
@@ -40,10 +40,10 @@ let
         # Get suboptions of `lsp.servers.<name>`
         (opts: opts.${name}.type.getSubOptions opts.${name}.loc)
         # Get the default package
-        (opts: opts.package.default or null)
-        # The default throws if mkPackageOption can't find the package
-        # E.g. mismatched nixpkgs revision
-        (package: (builtins.tryEval package).value)
+        #
+        # Use tryEval to catch throws when mkPackageOption can't find the package,
+        # e.g., due to a mismatched nixpkgs revision
+        (opts: (builtins.tryEval (opts.package.default or null)).value)
         # Get package's homepage
         (package: package.meta.homepage or null)
       ];
@@ -59,20 +59,6 @@ let
       '';
       default = { };
     };
-
-  # Combine `packages` and `customCmd` sets from `lsp-packages.nix`
-  # We use this set to generate the package-option defaults
-  serverPackages =
-    let
-      inherit (import ../../../plugins/lsp/lsp-packages.nix)
-        packages
-        customCmd
-        ;
-    in
-    builtins.mapAttrs (name: v: {
-      inherit name;
-      package = v.package or v;
-    }) (packages // customCmd);
 in
 {
   options.lsp = {
@@ -82,7 +68,10 @@ in
           freeformType = types.attrsOf (mkServerType { });
         }
         {
-          options = builtins.mapAttrs mkServerOption serverPackages;
+          # Declare explicit options for each `packages.nix` entry with a known package
+          options = builtins.mapAttrs (
+            name: package: mkServerOption { inherit name package; }
+          ) (import ./packages.nix).packages;
         }
         {
           # `*` is effectively a meta server, where shared config & defaults can be set.

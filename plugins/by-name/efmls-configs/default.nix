@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  options,
   pkgs,
   ...
 }:
@@ -21,8 +22,18 @@ lib.nixvim.plugins.mkNeovimPlugin {
       packageName = "efm-langserver";
     })
 
+    (
+      let
+        basePluginPath = [
+          "plugins"
+          "efmls-configs"
+        ];
+      in
+      lib.mkRenamedOptionModule (basePluginPath ++ [ "setup" ]) (basePluginPath ++ [ "languages" ])
+    )
+
     # Propagate setup warnings
-    { inherit (config.plugins.efmls-configs.setup) warnings; }
+    { inherit (config.plugins.efmls-configs.languages) warnings; }
   ];
 
   hasSettings = false;
@@ -77,7 +88,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
           };
         }
       */
-      setup = lib.mkOption {
+      languages = lib.mkOption {
         type = lib.types.submodule {
           freeformType = lib.types.attrsOf lib.types.anything;
 
@@ -115,7 +126,11 @@ lib.nixvim.plugins.mkNeovimPlugin {
               };
             };
         };
-        description = "Configuration for each filetype. Use `all` to match any filetype.";
+        description = ''
+          Configuration for each filetype. Use `all` to match any filetype.
+
+          This option is used to populate `${options.lsp.servers}.efm.config.settings.languages`.
+        '';
         default = { };
       };
     };
@@ -137,7 +152,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
             (
               lib.attrValues (
                 # Rename aliases added 2025-06-25 in https://github.com/nix-community/nixvim/pull/3503
-                builtins.removeAttrs cfg.setup [
+                removeAttrs cfg.languages [
                   "warnings"
                   "HTML"
                   "JSON"
@@ -168,28 +183,6 @@ lib.nixvim.plugins.mkNeovimPlugin {
         map (
           tool: if lib.isString tool then lib.nixvim.mkRaw "require 'efmls-configs.${kind}.${tool}'" else tool
         ) (lib.toList opt);
-
-      setupOptions =
-        (lib.mapAttrs
-          (
-            _:
-            {
-              linter ? [ ],
-              formatter ? [ ],
-            }:
-            (mkToolValue "linters" linter) ++ (mkToolValue "formatters" formatter)
-          )
-          (
-            builtins.removeAttrs cfg.setup [
-              "all"
-              "warnings"
-            ]
-          )
-        )
-        // {
-          "=" =
-            (mkToolValue "linters" cfg.setup.all.linter) ++ (mkToolValue "formatters" cfg.setup.all.formatter);
-        };
     in
     {
       # TODO: print the location of the offending options
@@ -204,7 +197,31 @@ lib.nixvim.plugins.mkNeovimPlugin {
 
       lsp.servers.efm = {
         enable = true;
-        config.settings.languages = setupOptions;
+        config.settings.languages =
+          (lib.mapAttrs
+            (
+              _:
+              {
+                linter ? [ ],
+                formatter ? [ ],
+              }:
+              (mkToolValue "linters" linter) ++ (mkToolValue "formatters" formatter)
+            )
+            (
+              removeAttrs cfg.languages [
+                "all"
+                # Rename aliases added 2025-06-25 in https://github.com/nix-community/nixvim/pull/3503
+                "warnings"
+                "HTML"
+                "JSON"
+              ]
+            )
+          )
+          // {
+            "=" =
+              (mkToolValue "linters" cfg.languages.all.linter)
+              ++ (mkToolValue "formatters" cfg.languages.all.formatter);
+          };
       };
 
       extraPackages = map (name: cfg.toolPackages.${name}) nixvimPkgs.right;

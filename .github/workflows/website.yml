@@ -12,6 +12,10 @@ concurrency:
   group: docs-website
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   prepare:
     name: Version info
@@ -115,7 +119,7 @@ jobs:
 
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           path: ${{ env.in }}
           pattern: "*-docs"

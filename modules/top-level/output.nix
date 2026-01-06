@@ -1,8 +1,8 @@
 {
   pkgs,
   config,
+  options,
   lib,
-  helpers,
   ...
 }:
 let
@@ -31,8 +31,8 @@ in
 
     waylandSupport = mkOption {
       type = types.bool;
-      default = pkgs.stdenv.hostPlatform.isLinux;
-      defaultText = lib.literalExpression "pkgs.stdenv.hostPlatform.isLinux";
+      default = lib.meta.availableOn pkgs.stdenv.hostPlatform pkgs.wayland;
+      defaultText = lib.literalExpression "lib.meta.availableOn pkgs.stdenv.hostPlatform pkgs.wayland";
       description = "Enable additional wayland support, such as wl-clipboard for wayland clipboard syncing.";
     };
 
@@ -69,7 +69,7 @@ in
       description = ''
         Whether the config will be included in the wrapper script.
 
-        When enabled, the nixvim config will be passed to `nvim` using the `-u` option.
+        When enabled, the Nixvim config will be passed to `nvim` using the `-u` option.
       '';
       defaultText = lib.literalMD ''
         Configured by your installation method: `false` when using the Home Manager module, `true` otherwise.
@@ -236,8 +236,8 @@ in
         dontFixup = true;
       };
 
-      customRC = helpers.concatNonEmptyLines [
-        (helpers.wrapVimscriptForLua wrappedNeovim.initRc)
+      customRC = lib.nixvim.concatNonEmptyLines [
+        (lib.nixvim.wrapVimscriptForLua wrappedNeovim.initRc)
         config.content
       ];
 
@@ -320,6 +320,9 @@ in
               printInitPackage
             ];
           meta.mainProgram = "nvim";
+          passthru = {
+            inherit config options;
+          };
         };
 
         printInitPackage = pkgs.writeShellApplication {

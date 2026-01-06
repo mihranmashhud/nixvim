@@ -100,6 +100,16 @@
         sources =
           let
             disabled = [
+              # TODO Added 2025-12-24: phpPackages.php-codesniffer is broken
+              # https://github.com/NixOS/nixpkgs/pull/459254#issuecomment-3689578764
+              "phpcbf"
+              "phpcs"
+
+              # TODO Added 2025-11-15
+              # dependency swift is broken
+              # https://github.com/NixOS/nixpkgs/issues/461474
+              "swift_format"
+
               # TODO Added 2025-10-12
               # mbedtls is marked insecure
               "haxe_formatter"

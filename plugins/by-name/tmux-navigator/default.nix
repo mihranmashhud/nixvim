@@ -1,15 +1,16 @@
 {
   lib,
-  helpers,
   ...
 }:
-with lib;
+let
+  inherit (lib) types;
+in
 lib.nixvim.plugins.mkVimPlugin {
   name = "tmux-navigator";
   package = "vim-tmux-navigator";
   globalPrefix = "tmux_navigator_";
 
-  maintainers = [ maintainers.MattSturgeon ];
+  maintainers = [ lib.maintainers.MattSturgeon ];
 
   description = ''
     Seamless navigation between tmux panes and vim splits.
@@ -97,7 +98,7 @@ lib.nixvim.plugins.mkVimPlugin {
 
   settingsOptions = {
     save_on_switch =
-      helpers.mkNullOrOption
+      lib.nixvim.mkNullOrOption
         (types.enum [
           1
           2
@@ -110,14 +111,14 @@ lib.nixvim.plugins.mkVimPlugin {
           2: `:wall` (write all buffers)
         '';
 
-    disable_when_zoomed = helpers.defaultNullOpts.mkFlagInt 0 ''
+    disable_when_zoomed = lib.nixvim.defaultNullOpts.mkFlagInt 0 ''
       By default, if you zoom the tmux pane running vim and then attempt to navigate "past" the edge of the vim session, tmux will unzoom the pane.
       This is the default tmux behavior, but may be confusing if you've become accustomed to navigation "wrapping" around the sides due to this plugin.
 
       This option disables the unzooming behavior, keeping all navigation within vim until the tmux pane is explicitly unzoomed.
     '';
 
-    preserve_zoom = helpers.defaultNullOpts.mkFlagInt 0 ''
+    preserve_zoom = lib.nixvim.defaultNullOpts.mkFlagInt 0 ''
       As noted in `disable_when_zoomed`, navigating from a vim pane to another tmux pane normally causes the window to be unzoomed.
       Some users may prefer the behavior of tmux's `-Z` option to `select-pane`, which keeps the window zoomed if it was zoomed.
 
@@ -126,7 +127,7 @@ lib.nixvim.plugins.mkVimPlugin {
       Naturally, if `disable_when_zoomed` is enabled, this option will have no effect.
     '';
 
-    no_wrap = helpers.defaultNullOpts.mkFlagInt 0 ''
+    no_wrap = lib.nixvim.defaultNullOpts.mkFlagInt 0 ''
       By default, if you try to move past the edge of the screen, tmux/vim will "wrap" around to the opposite side.
 
       This option disables "wrapping" in vim, but tmux will need to be configured separately.
@@ -149,7 +150,7 @@ lib.nixvim.plugins.mkVimPlugin {
       ```
     '';
 
-    no_mappings = helpers.defaultNullOpts.mkFlagInt 0 ''
+    no_mappings = lib.nixvim.defaultNullOpts.mkFlagInt 0 ''
       By default `<C-h>`, `<C-j>`, `<C-k>`, `<C-l>`, & `<C-\\>`
       are mapped to navigating left, down, up, right, & previous, respectively.
 
@@ -162,7 +163,7 @@ lib.nixvim.plugins.mkVimPlugin {
   };
 
   extraOptions = {
-    keymaps = mkOption {
+    keymaps = lib.mkOption {
       description = ''
         Keymaps for the `:TmuxNavigate*` commands.
 
@@ -196,7 +197,7 @@ lib.nixvim.plugins.mkVimPlugin {
       ];
       default = [ ];
       type = types.listOf (
-        helpers.keymaps.mkMapOptionSubmodule {
+        lib.nixvim.keymaps.mkMapOptionSubmodule {
           action = {
             description = "The direction in which to navigate.";
             type = types.enum [
@@ -211,13 +212,13 @@ lib.nixvim.plugins.mkVimPlugin {
           lua = true;
         }
       );
-      apply = map helpers.keymaps.removeDeprecatedMapAttrs;
+      apply = map lib.nixvim.keymaps.removeDeprecatedMapAttrs;
     };
   };
 
   extraConfig = cfg: {
     keymaps = map (
-      mapping: mapping // { action = "<cmd>TmuxNavigate${helpers.upperFirstChar mapping.action}<cr>"; }
+      mapping: mapping // { action = "<cmd>TmuxNavigate${lib.nixvim.upperFirstChar mapping.action}<cr>"; }
     ) cfg.keymaps;
   };
 }

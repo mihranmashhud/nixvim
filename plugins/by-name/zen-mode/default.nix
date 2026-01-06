@@ -1,26 +1,24 @@
 {
   lib,
-  helpers,
   ...
 }:
-with lib;
 lib.nixvim.plugins.mkNeovimPlugin {
   name = "zen-mode";
   package = "zen-mode-nvim";
   description = "Distraction-free coding for Neovim.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   # Optionally, explicitly declare some options. You don't have to.
   settingsOptions = {
     window = {
-      backdrop = helpers.defaultNullOpts.mkProportion 0.95 ''
+      backdrop = lib.nixvim.defaultNullOpts.mkProportion 0.95 ''
         Shade the backdrop of the Zen window.
         Set to 1 to keep the same as Normal.
       '';
 
       width =
-        helpers.defaultNullOpts.mkNullable
+        lib.nixvim.defaultNullOpts.mkNullable
           (
             with lib.types;
             oneOf [
@@ -40,7 +38,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
           '';
 
       height =
-        helpers.defaultNullOpts.mkNullable
+        lib.nixvim.defaultNullOpts.mkNullable
           (
             with lib.types;
             oneOf [
@@ -59,7 +57,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
             - a function that returns the width or the height
           '';
 
-      options = helpers.defaultNullOpts.mkAttrsOf types.anything { } ''
+      options = lib.nixvim.defaultNullOpts.mkAttrsOf lib.types.anything { } ''
         By default, no options are changed for the Zen window.
         You can set any `vim.wo` option here.
 
@@ -79,7 +77,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
     };
     plugins = {
       options =
-        helpers.defaultNullOpts.mkAttrsOf types.anything
+        lib.nixvim.defaultNullOpts.mkAttrsOf lib.types.anything
           {
             enabled = true;
             ruler = false;
@@ -91,11 +89,11 @@ lib.nixvim.plugins.mkNeovimPlugin {
           '';
     };
 
-    on_open = helpers.defaultNullOpts.mkLuaFn "function(win) end" ''
+    on_open = lib.nixvim.defaultNullOpts.mkLuaFn "function(win) end" ''
       Callback where you can add custom code when the Zen window opens.
     '';
 
-    on_close = helpers.defaultNullOpts.mkLuaFn "function(win) end" ''
+    on_close = lib.nixvim.defaultNullOpts.mkLuaFn "function(win) end" ''
       Callback where you can add custom code when the Zen window closes.
     '';
   };

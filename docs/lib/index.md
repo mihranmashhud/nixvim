@@ -26,6 +26,7 @@ in
 ```
 
 The extended `lib` is also accessible in the `lib` module argument in the `programs.nixvim` submodule:
+
 ```nix
 {
   programs.nixvim =
@@ -56,7 +57,7 @@ You can also import inside the submodule:
   # You can use lib.nixvim in your config
   fooOption = lib.nixvim.mkRaw "print('hello')";
 
-  # Configure NixVim without prefixing with `plugins.nixvim`
+  # Configure Nixvim without prefixing with `plugins.nixvim`
   plugins.my-plugin.enable = true;
 }
 ```

@@ -4,6 +4,10 @@
   package ? null,
   config ? null,
 }@args:
+let
+  displayName = name;
+  packageName = package.name or args.name or "language server";
+in
 {
   lib,
   name,
@@ -13,8 +17,6 @@
 }:
 let
   inherit (lib) types;
-  displayName = args.name or "the language server";
-  packageName = package.name or (lib.strings.removePrefix "the " displayName);
 in
 {
   options = {
@@ -36,10 +38,7 @@ in
       description = ''
         Whether to call `vim.lsp.enable()` for ${displayName}.
       '';
-      default = config.name != "*";
-      defaultText = lib.literalMD ''
-        `true`, unless the server's `name` is `*`
-      '';
+      default = true;
       example = false;
     };
 
@@ -60,7 +59,7 @@ in
       description = ''
         When enabled, the language server package will be added to the end of the `PATH` _(suffix)_ instead of the beginning _(prefix)_.
 
-        This can be useful if you want local versions of the language server (e.g. from a devshell) to override the nixvim version.
+        This can be useful if you want local versions of the language server (e.g. from a devshell) to override the Nixvim version.
       '';
     };
 

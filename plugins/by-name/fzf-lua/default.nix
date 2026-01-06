@@ -1,13 +1,8 @@
-{
-  config,
-  lib,
-  helpers,
-  ...
-}:
-with lib;
+{ lib, ... }:
 let
+  inherit (lib) types mkOption;
   settingsOptions = {
-    fzf_bin = helpers.mkNullOrStr ''
+    fzf_bin = lib.nixvim.mkNullOrStr ''
       The path to the `fzf` binary to use.
 
       Example: `"sk"`
@@ -33,29 +28,14 @@ lib.nixvim.plugins.mkNeovimPlugin {
   name = "fzf-lua";
   description = "`fzf` powered fuzzy finder for Neovim written in Lua.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   inherit settingsOptions settingsExample;
 
   dependencies = [ "fzf" ];
 
-  imports = [
-    # TODO: added 2025-04-07, remove after 25.05
-    (lib.nixvim.mkRemovedPackageOptionModule {
-      plugin = "fzf-lua";
-      packageName = "fzf";
-    })
-  ];
-
   extraOptions = {
-    # TODO: deprecated 2024-08-29 remove after 24.11
-    iconsEnabled = mkOption {
-      type = types.bool;
-      description = "Toggle icon support. Installs nvim-web-devicons.";
-      visible = false;
-    };
-
-    profile = helpers.defaultNullOpts.mkEnumFirstDefault [
+    profile = lib.nixvim.defaultNullOpts.mkEnumFirstDefault [
       "default"
       "fzf-native"
       "fzf-tmux"
@@ -76,13 +56,13 @@ lib.nixvim.plugins.mkNeovimPlugin {
                 description = "The `fzf-lua` action to run";
                 example = "git_files";
               };
-              settings = helpers.mkSettingsOption {
+              settings = lib.nixvim.mkSettingsOption {
                 options = settingsOptions;
                 description = "`fzf-lua` settings for this command.";
                 example = settingsExample;
               };
-              mode = helpers.keymaps.mkModeOption "n";
-              options = helpers.keymaps.mapConfigOptions;
+              mode = lib.nixvim.keymaps.mkModeOption "n";
+              options = lib.nixvim.keymaps.mapConfigOptions;
             };
           })
         );
@@ -107,46 +87,18 @@ lib.nixvim.plugins.mkNeovimPlugin {
     };
   };
 
-  extraConfig = cfg: opts: {
+  extraConfig = cfg: {
     dependencies.skim.enable = lib.mkIf (cfg.profile == "skim" || cfg.settings.fzf_bin == "sk") (
       lib.mkDefault true
     );
 
-    # TODO: deprecated 2024-08-29 remove after 24.11
-    warnings = lib.nixvim.mkWarnings "plugins.fzf-lua" {
-      when = opts.iconsEnabled.isDefined;
-
-      message = ''
-        The option definition `plugins.fzf-lua.iconsEnabled' in ${lib.showFiles opts.iconsEnabled.files} has been deprecated; please remove it.
-      '';
-    };
-
-    # TODO: added 2024-09-20 remove after 24.11
-    plugins.web-devicons =
-      lib.mkIf
-        (
-          opts.iconsEnabled.isDefined
-          && cfg.iconsEnabled
-          && !(
-            (
-              config.plugins.mini.enable
-              && config.plugins.mini.modules ? icons
-              && config.plugins.mini.mockDevIcons
-            )
-            || (config.plugins.mini-icons.enable && config.plugins.mini-icons.mockDevIcons)
-          )
-        )
-        {
-          enable = lib.mkOverride 1490 true;
-        };
-
     plugins.fzf-lua.settings.__unkeyed_profile = cfg.profile;
 
-    keymaps = mapAttrsToList (
+    keymaps = lib.mapAttrsToList (
       key: mapping:
       let
         actionStr =
-          if isString mapping then
+          if lib.isString mapping then
             "${mapping}()"
           else
             "${mapping.action}(${lib.nixvim.toLuaObject mapping.settings})";

@@ -1,19 +1,17 @@
 {
   lib,
-  helpers,
   config,
   ...
 }:
-with lib;
 lib.nixvim.plugins.mkNeovimPlugin {
   name = "refactoring";
   package = "refactoring-nvim";
   description = "The Refactoring library based off the Refactoring book by Martin Fowler.";
 
-  maintainers = [ maintainers.MattSturgeon ];
+  maintainers = [ lib.maintainers.MattSturgeon ];
 
   extraOptions = {
-    enableTelescope = mkEnableOption "telescope integration";
+    enableTelescope = lib.mkEnableOption "telescope integration";
   };
 
   extraConfig = cfg: {
@@ -26,12 +24,12 @@ lib.nixvim.plugins.mkNeovimPlugin {
       '';
     };
 
-    plugins.telescope.enabledExtensions = mkIf cfg.enableTelescope [ "refactoring" ];
+    plugins.telescope.enabledExtensions = lib.mkIf cfg.enableTelescope [ "refactoring" ];
   };
 
   settingsOptions = with lib.types; {
     prompt_func_return_type =
-      helpers.defaultNullOpts.mkAttrsOf bool
+      lib.nixvim.defaultNullOpts.mkAttrsOf bool
         {
           go = false;
           java = false;
@@ -60,7 +58,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
         '';
 
     prompt_func_param_type =
-      helpers.defaultNullOpts.mkAttrsOf bool
+      lib.nixvim.defaultNullOpts.mkAttrsOf bool
         {
           go = false;
           java = false;
@@ -87,7 +85,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
             }
         '';
 
-    printf_statements = helpers.defaultNullOpts.mkAttrsOf (listOf (maybeRaw str)) { } ''
+    printf_statements = lib.nixvim.defaultNullOpts.mkAttrsOf (listOf (maybeRaw str)) { } ''
       In any custom printf statement, it is possible to optionally add a **max of one `%s` pattern**, which is where the debug path will go.
       For an example custom printf statement, go to [this folder][folder], select your language, and click on `multiple-statements/printf.config`.
 
@@ -106,7 +104,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
       [folder]: https://github.com/ThePrimeagen/refactoring.nvim/blob/master/lua/refactoring/tests/debug/printf
     '';
 
-    print_var_statements = helpers.defaultNullOpts.mkAttrsOf (listOf (maybeRaw str)) { } ''
+    print_var_statements = lib.nixvim.defaultNullOpts.mkAttrsOf (listOf (maybeRaw str)) { } ''
       In any custom print var statement, it is possible to optionally add a **max of two `%s` patterns**, which is where the debug path and
       the actual variable reference will go, respectively. To add a literal `"%s"` to the string, escape the sequence like this: `%%s`.
       For an example custom print var statement, go to [this folder][folder], select your language, and view `multiple-statements/print_var.config`.
@@ -126,7 +124,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
       [folder]: https://github.com/ThePrimeagen/refactoring.nvim/blob/master/lua/refactoring/tests/debug/print_var
     '';
 
-    extract_var_statements = helpers.defaultNullOpts.mkAttrsOf str { } ''
+    extract_var_statements = lib.nixvim.defaultNullOpts.mkAttrsOf str { } ''
       When performing an `extract_var` refactor operation, you can custom how the new variable would be declared by setting configuration
       like the below example.
 
@@ -140,7 +138,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
       ```
     '';
 
-    show_success_message = helpers.defaultNullOpts.mkBool false ''
+    show_success_message = lib.nixvim.defaultNullOpts.mkBool false ''
       Shows a message with information about the refactor on success. Such as:
 
       ```

@@ -1,24 +1,21 @@
-{
-  lib,
-  helpers,
-  ...
-}:
-with lib.nixvim.plugins;
-with lib;
-mkVimPlugin {
+{ lib, ... }:
+let
+  inherit (lib) types;
+in
+lib.nixvim.plugins.mkVimPlugin {
   name = "goyo";
   package = "goyo-vim";
   globalPrefix = "goyo_";
   description = "Distraction-free writing in Vim.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   settingsOptions = {
-    width = helpers.mkNullOrOption types.ints.unsigned "width";
+    width = lib.nixvim.mkNullOrOption types.ints.unsigned "width";
 
-    height = helpers.mkNullOrOption types.ints.unsigned "height";
+    height = lib.nixvim.mkNullOrOption types.ints.unsigned "height";
 
-    linenr = helpers.defaultNullOpts.mkFlagInt 0 ''
+    linenr = lib.nixvim.defaultNullOpts.mkFlagInt 0 ''
       Show line numbers when in Goyo mode.
     '';
   };

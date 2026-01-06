@@ -1,17 +1,17 @@
 {
   lib,
-  helpers,
   pkgs,
   ...
 }:
-with lib;
-with lib.nixvim.plugins;
+let
+  inherit (lib) mkOption types;
+in
 lib.nixvim.plugins.mkVimPlugin {
   name = "copilot-vim";
   globalPrefix = "copilot_";
   description = "Official Neovim plugin for GitHub Copilot.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   settingsOptions = {
     node_command = mkOption {
@@ -43,7 +43,7 @@ lib.nixvim.plugins.mkVimPlugin {
       example = "localhost:3128";
     };
 
-    proxy_strict_ssl = helpers.mkNullOrOption types.bool ''
+    proxy_strict_ssl = lib.nixvim.mkNullOrOption types.bool ''
       Corporate proxies sometimes use a man-in-the-middle SSL certificate which is incompatible
       with GitHub Copilot.
       To work around this, SSL certificate verification can be disabled by setting this option to
@@ -53,7 +53,7 @@ lib.nixvim.plugins.mkVimPlugin {
       `$NODE_TLS_REJECT_UNAUTHORIZED` environment variable to `"0"`.
     '';
 
-    workspace_folders = helpers.mkNullOrOption (with types; listOf str) ''
+    workspace_folders = lib.nixvim.mkNullOrOption (with types; listOf str) ''
       A list of "workspace folders" or project roots that Copilot may use to improve to improve
       the quality of suggestions.
 

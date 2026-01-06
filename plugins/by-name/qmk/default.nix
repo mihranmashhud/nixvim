@@ -1,15 +1,13 @@
-{
-  lib,
-  helpers,
-  ...
-}:
-with lib;
+{ lib, ... }:
+let
+  inherit (lib) mkOption types;
+in
 lib.nixvim.plugins.mkNeovimPlugin {
   name = "qmk";
   package = "qmk-nvim";
   description = "Format qmk and zmk keymaps in Neovim.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   settingsOptions = {
     name = mkOption {
@@ -41,7 +39,7 @@ lib.nixvim.plugins.mkNeovimPlugin {
     };
 
     variant =
-      helpers.defaultNullOpts.mkEnumFirstDefault
+      lib.nixvim.defaultNullOpts.mkEnumFirstDefault
         [
           "qmk"
           "zmk"
@@ -50,17 +48,17 @@ lib.nixvim.plugins.mkNeovimPlugin {
           Chooses the expected hardware target.
         '';
 
-    timeout = helpers.defaultNullOpts.mkUnsignedInt 5000 ''
+    timeout = lib.nixvim.defaultNullOpts.mkUnsignedInt 5000 ''
       Duration of `vim.notify` timeout if using `nvim-notify`.
     '';
 
-    auto_format_pattern = helpers.defaultNullOpts.mkStr "*keymap.c" ''
+    auto_format_pattern = lib.nixvim.defaultNullOpts.mkStr "*keymap.c" ''
       The autocommand file pattern to use when applying `QMKFormat` on save.
     '';
 
     comment_preview = {
       position =
-        helpers.defaultNullOpts.mkEnumFirstDefault
+        lib.nixvim.defaultNullOpts.mkEnumFirstDefault
           [
             "top"
             "bottom"
@@ -72,13 +70,13 @@ lib.nixvim.plugins.mkNeovimPlugin {
             `variant=qmk`).
           '';
 
-      keymap_overrides = helpers.defaultNullOpts.mkAttrsOf types.str { } ''
+      keymap_overrides = lib.nixvim.defaultNullOpts.mkAttrsOf types.str { } ''
         A dictionary of key codes to text replacements, any provided value will be merged with the
         existing dictionary, see [key_map.lua](https://github.com/codethread/qmk.nvim/blob/main/lua/qmk/config/key_map.lua) for details.
       '';
 
       symbols =
-        helpers.defaultNullOpts.mkAttrsOf types.str
+        lib.nixvim.defaultNullOpts.mkAttrsOf types.str
           {
             space = " ";
             horz = "─";

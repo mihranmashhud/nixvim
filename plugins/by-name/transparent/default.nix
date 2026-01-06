@@ -1,19 +1,17 @@
-{
-  lib,
-  helpers,
-  ...
-}:
-with lib;
+{ lib, ... }:
+let
+  inherit (lib) types;
+in
 lib.nixvim.plugins.mkNeovimPlugin {
   name = "transparent";
   package = "transparent-nvim";
   description = "Remove all background colors to make Neovim transparent.";
 
-  maintainers = [ maintainers.GaetanLepage ];
+  maintainers = [ lib.maintainers.GaetanLepage ];
 
   settingsOptions = {
     groups =
-      helpers.defaultNullOpts.mkListOf types.str
+      lib.nixvim.defaultNullOpts.mkListOf types.str
         [
           "Normal"
           "NormalNC"
@@ -45,11 +43,11 @@ lib.nixvim.plugins.mkNeovimPlugin {
           The list of transparent groups.
         '';
 
-    extra_groups = helpers.defaultNullOpts.mkListOf types.str [ ] ''
+    extra_groups = lib.nixvim.defaultNullOpts.mkListOf types.str [ ] ''
       Additional groups that should be cleared.
     '';
 
-    exclude_groups = helpers.defaultNullOpts.mkListOf types.str [ ] ''
+    exclude_groups = lib.nixvim.defaultNullOpts.mkListOf types.str [ ] ''
       Groups that you don't want to clear.
     '';
   };

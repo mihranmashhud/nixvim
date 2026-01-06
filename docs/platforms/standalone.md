@@ -34,11 +34,11 @@ This function is recursive, meaning that it can be applied an arbitrary number o
 
 ```nix
 {makeNixvim}: let
-    first = makeNixvim { extraConfigLua = "-- first stage"; };
-    second = first.extend {extraConfigLua = "-- second stage";};
-    third = second.extend {extraConfigLua = "-- third stage";};
+  first = makeNixvim { extraConfigLua = "-- first stage"; };
+  second = first.extend {extraConfigLua = "-- second stage";};
+  third = second.extend {extraConfigLua = "-- third stage";};
 in
-    third
+third
 ```
 
 This will generate a `init.lua` that will contain the comments from each stages:
@@ -51,20 +51,20 @@ This will generate a `init.lua` that will contain the comments from each stages:
 
 ## Accessing options used in an existing configuration
 
-The `config` used to produce a standalone nixvim derivation can be accessed as an attribute on the derivation, similar to `<nixvim>.extend`.
+The `config` used to produce a standalone Nixvim derivation can be accessed as an attribute on the derivation, similar to `<nixvim>.extend`.
 
-This may be useful if you want unrelated parts of your NixOS, Home Manager or nix-darwin configuration to use the same value as something in your nixvim configuration.
+This may be useful if you want unrelated parts of your NixOS, Home Manager or nix-darwin configuration to use the same value as something in your Nixvim configuration.
 
-## Accessing nixvim options
+## Accessing Nixvim options
 
-Given a nixvim derivation it is possible to access the module options using `<derivation>.options`.
+Given a Nixvim derivation it is possible to access the module options using `<derivation>.options`.
 This can be useful to configure `nixd` for example:
 
 ```nix
-plugins.lsp.servers.nixd = {
+{
+  plugins.lsp.servers.nixd = {
     enable = true;
-    settings = {
-        options.nixvim.expr = ''(builtins.getFlake "/path/to/flake").packages.${system}.neovimNixvim.options'';
-    };
-};
+    settings.options.nixvim.expr = ''(builtins.getFlake "/path/to/flake").packages.${system}.neovimNixvim.options'';
+  };
+}
 ```

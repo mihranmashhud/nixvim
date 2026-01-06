@@ -29,7 +29,7 @@ let
     let
       missingFromPkgs = builtins.concatMap (
         loc: lib.optional (!lib.hasAttrByPath loc pkgs) (lib.concatStringsSep "." loc)
-      ) (builtins.map lib.toList packages);
+      ) (map lib.toList packages);
       undeclared = lib.filter (name: !(lib.elem name declared)) generated;
       uselesslyDeclared = lib.partition (name: lib.elem name unsupported) (
         lib.filter (name: !(lib.elem name generated)) declared
@@ -45,15 +45,15 @@ let
   errors = lib.concatStringsSep "\n" (
     checkDeclarations (
       let
-        inherit (import ../plugins/lsp/lsp-packages.nix) unpackaged packages customCmd;
+        inherit (import ../modules/lsp/servers/packages.nix) unpackaged packages;
       in
       {
         name = "lsp";
-        declarationFile = "plugins/lsp/lsp-packages.nix";
+        declarationFile = "modules/lsp/servers/packages.nix";
 
         packages = builtins.attrValues packages;
 
-        declared = unpackaged ++ lib.attrsets.attrNames (packages // customCmd);
+        declared = unpackaged ++ lib.attrsets.attrNames packages;
 
         generated = builtins.attrNames (lib.importJSON ../generated/lspconfig-servers.json);
         unsupported = lib.importJSON ../generated/unsupported-lspconfig-servers.json;

@@ -1,8 +1,8 @@
 {
   # The nixvim flake
   self,
-  # Extra args for the `evalNixvim` call that produces the type for `programs.nixvim`
-  evalArgs ? { },
+  # Function used to evaluate the `programs.nixvim` configuration
+  extendModules,
   # Option path where extraFiles should go
   filesOpt ? null,
   # Filepath prefix to apply to extraFiles
@@ -19,8 +19,6 @@
 }:
 let
   inherit (lib)
-    listToAttrs
-    map
     mkIf
     mkMerge
     optionalAttrs
@@ -45,14 +43,13 @@ let
       };
     };
 
-  nixvimConfiguration = config.lib.nixvim.modules.evalNixvim (
-    evalArgs
-    // {
-      modules = evalArgs.modules or [ ] ++ [
-        nixpkgsModule
-      ];
-    }
-  );
+  nixvimConfiguration = extendModules {
+    modules = [
+      nixpkgsModule
+      { disabledModules = [ "<internal:nixvim-nocheck-base-eval>" ]; }
+    ];
+  };
+
   extraFiles = lib.filter (file: file.enable) (lib.attrValues cfg.extraFiles);
 in
 {
@@ -70,10 +67,16 @@ in
 
   config = mkMerge [
     {
-      # Make our lib available to the host modules
-      # - the `config.lib.nixvim` option is the nixvim-lib
-      # - the `nixvimLib` arg is `lib` extended with our overlay
-      lib.nixvim = lib.mkDefault config._module.args.nixvimLib.nixvim;
+      # Make Nixvim's extended lib available to the host modules
+      # - The `config.lib.nixvim` option is Nixvim's section of the lib
+      #   (based on our flake's locked Nixpkgs lib)
+      # - The `nixvimLib` arg is `lib` extended with our overlay
+      #   (based on the host configuration's `lib`)
+      #
+      # NOTE: It is important that we use the flake-locked Nixpkgs lib,
+      # so that we can safely use recently added lib features.
+      # TODO: Consider deprecating `_module.args.nixvimLib`?
+      lib.nixvim = lib.mkDefault self.lib.nixvim;
       _module.args.nixvimLib = lib.mkDefault (lib.extend self.lib.overlay);
     }
 
@@ -84,7 +87,7 @@ in
     (optionalAttrs (filesOpt != null) (
       mkIf (cfg.enable && !cfg.wrapRc) (
         setAttrByPath filesOpt (
-          listToAttrs (
+          builtins.listToAttrs (
             map (
               { target, finalSource, ... }:
               {

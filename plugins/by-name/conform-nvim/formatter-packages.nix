@@ -3,26 +3,38 @@
   ...
 }:
 with pkgs;
-rec {
-  sType = {
-    broken = "broken";
-    darwinOnly = "Darwin only";
+let
+  states = {
+    broken = _package: "broken";
+    darwinOnly = _package: "Darwin only";
     unpackaged = "unpackaged";
   };
-
+in
+{
+  inherit states;
   formatter-packages = {
-    swift_format = if !stdenv.isDarwin then sType.darwinOnly else swift-format;
-    swiftlint = if !stdenv.isDarwin then sType.darwinOnly else swiftlint;
+    # 2025-12-24: phpPackages.php-codesniffer is broken
+    # https://github.com/NixOS/nixpkgs/pull/459254#issuecomment-3689578764
+    phpcbf = states.broken php84Packages.php-codesniffer;
+
+    # 2025-11-15 dependency swift is broken
+    # https://github.com/NixOS/nixpkgs/issues/461474
+    swift = states.broken swift;
+    swift_format = states.broken swift-format;
+    swiftformat = states.broken swiftformat;
+    swiftlint = states.broken swiftlint;
 
     # 2025-10-12 build failure on Darwin
-    smlfmt = if stdenv.isDarwin then sType.broken else smlfmt;
+    smlfmt = if stdenv.isDarwin then states.broken smlfmt else smlfmt;
 
+    # 2025-11-25 build failure
+    roc = states.broken roc;
     # 2025-09-13 build failure
-    inko = sType.broken;
+    inko = states.broken inko;
     # 2025-09-17 build failure
-    gci = sType.broken;
+    gci = states.broken gci;
     # 2025-10-08 build failure (haskellPackages.hindent)
-    hindent = sType.broken;
+    hindent = states.broken haskellPackages.hindent;
 
     format-queries = null; # Uses neovim itself
     init = null; # Internal thingamajig
@@ -30,54 +42,55 @@ rec {
     trim_newlines = null; # Conform native formatter
     trim_whitespace = null; # Conform native formatter
 
-    auto_optional = sType.unpackaged;
-    bake = sType.unpackaged;
-    blue = sType.unpackaged;
-    bpfmt = sType.unpackaged;
-    bsfmt = sType.unpackaged;
-    caramel_fmt = sType.unpackaged;
-    crlfmt = sType.unpackaged;
-    darker = sType.unpackaged;
-    dcm_fix = sType.unpackaged;
-    dcm_format = sType.unpackaged;
-    easy-coding-standard = sType.unpackaged;
-    findent = sType.unpackaged;
-    ghokin = sType.unpackaged;
-    gluon_fmt = sType.unpackaged;
-    grain_format = sType.unpackaged;
-    hledger-fmt = sType.unpackaged;
-    imba_fmt = sType.unpackaged;
-    janet-format = sType.unpackaged;
-    json_repair = sType.unpackaged;
-    liquidsoap-prettier = sType.unpackaged;
-    llf = sType.unpackaged;
-    markdown-toc = sType.unpackaged;
-    markdownfmt = sType.unpackaged;
-    mdslw = sType.unpackaged;
-    mojo_format = sType.unpackaged;
-    nomad_fmt = sType.unpackaged;
-    npm-groovy-lint = sType.unpackaged;
-    packer_fmt = sType.unpackaged;
-    pangu = sType.unpackaged;
-    perlimports = sType.unpackaged;
-    pint = sType.unpackaged;
-    purs-tidy = sType.unpackaged;
-    pycln = sType.unpackaged;
-    pyink = sType.unpackaged;
-    pymarkdownlnt = sType.unpackaged;
-    reformat-gherkin = sType.unpackaged;
-    rescript-format = sType.unpackaged;
-    runic = sType.unpackaged;
-    spotless_gradle = sType.unpackaged;
-    spotless_maven = sType.unpackaged;
-    standard-clj = sType.unpackaged;
-    standardjs = sType.unpackaged;
-    tlint = sType.unpackaged;
-    twig-cs-fixer = sType.unpackaged;
-    typstfmt = sType.unpackaged;
-    vsg = sType.unpackaged;
-    ziggy = sType.unpackaged;
-    ziggy_schema = sType.unpackaged;
+    auto_optional = states.unpackaged;
+    bake = states.unpackaged;
+    blue = states.unpackaged;
+    bpfmt = states.unpackaged;
+    bsfmt = states.unpackaged;
+    caramel_fmt = states.unpackaged;
+    crlfmt = states.unpackaged;
+    darker = states.unpackaged;
+    dcm_fix = states.unpackaged;
+    dcm_format = states.unpackaged;
+    easy-coding-standard = states.unpackaged;
+    findent = states.unpackaged;
+    ghokin = states.unpackaged;
+    gluon_fmt = states.unpackaged;
+    grain_format = states.unpackaged;
+    hledger-fmt = states.unpackaged;
+    imba_fmt = states.unpackaged;
+    janet-format = states.unpackaged;
+    json_repair = states.unpackaged;
+    liquidsoap-prettier = states.unpackaged;
+    llf = states.unpackaged;
+    markdown-toc = states.unpackaged;
+    markdownfmt = states.unpackaged;
+    mdslw = states.unpackaged;
+    mojo_format = states.unpackaged;
+    nomad_fmt = states.unpackaged;
+    npm-groovy-lint = states.unpackaged;
+    packer_fmt = states.unpackaged;
+    palantir-java-format = states.unpackaged;
+    pangu = states.unpackaged;
+    perlimports = states.unpackaged;
+    pint = states.unpackaged;
+    purs-tidy = states.unpackaged;
+    pycln = states.unpackaged;
+    pyink = states.unpackaged;
+    pymarkdownlnt = states.unpackaged;
+    reformat-gherkin = states.unpackaged;
+    rescript-format = states.unpackaged;
+    runic = states.unpackaged;
+    spotless_gradle = states.unpackaged;
+    spotless_maven = states.unpackaged;
+    standard-clj = states.unpackaged;
+    standardjs = states.unpackaged;
+    tlint = states.unpackaged;
+    twig-cs-fixer = states.unpackaged;
+    typstfmt = states.unpackaged;
+    vsg = states.unpackaged;
+    ziggy = states.unpackaged;
+    ziggy_schema = states.unpackaged;
 
     inherit (python313Packages) autopep8;
     awk = gawk;
@@ -114,6 +127,7 @@ rec {
     mago_lint = mago;
     markdownlint = markdownlint-cli;
     mix = beamMinimal28Packages.elixir;
+    mh_style = python3Packages.miss-hit;
     nginxfmt = nginx-config-formatter;
     nimpretty = nim;
     nixpkgs_fmt = nixpkgs-fmt;
@@ -123,7 +137,6 @@ rec {
     perltidy = perl538Packages.PerlTidy;
     pg_format = pgformatter;
     php_cs_fixer = php83Packages.php-cs-fixer;
-    phpcbf = php84Packages.php-codesniffer;
     inherit (php84Packages) phpinsights;
     prolog = swi-prolog;
     pyproject-fmt = python313Packages.pyproject-parser;
@@ -140,6 +153,7 @@ rec {
     standardrb = rubyPackages.standard;
     styler = R;
     inherit (rubyPackages) syntax_tree;
+    tclfmt = tclint;
     terraform_fmt = tenv;
     terragrunt_hclfmt = terragrunt;
     tofu_fmt = opentofu;

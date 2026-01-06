@@ -1,19 +1,18 @@
 {
   lib,
-  helpers,
   pkgs,
   config,
   ...
 }:
 let
   builders = lib.nixvim.builders.withPkgs pkgs;
+  byteCompileLua = with config.performance.byteCompileLua; enable && configs;
 
   fileTypeModule =
     {
       name,
       config,
       options,
-      topConfig,
       ...
     }:
     {
@@ -68,11 +67,7 @@ let
           );
           finalSource =
             # Byte compile lua files if performance.byteCompileLua option is enabled
-            if
-              lib.hasSuffix ".lua" config.target
-              && topConfig.performance.byteCompileLua.enable
-              && topConfig.performance.byteCompileLua.configs
-            then
+            if byteCompileLua && lib.hasSuffix ".lua" config.target then
               if lib.isDerivation config.source then
                 # Source is a derivation
                 builders.byteCompileLuaDrv config.source
@@ -83,21 +78,11 @@ let
               config.source;
         };
     };
-
-  fileType = lib.types.submoduleWith {
-    shorthandOnlyDefinesConfig = true;
-    modules = [ fileTypeModule ];
-    specialArgs.topConfig = config;
-  };
-
-  # TODO: Added 2024-07-07, remove after 24.11
-  # Before we had a fileType, we used types.str.
-  coercedFileType = helpers.transitionType lib.types.str (text: { inherit text; }) fileType;
 in
 {
   options = {
     extraFiles = lib.mkOption {
-      type = lib.types.attrsOf coercedFileType;
+      type = lib.types.attrsOf (lib.types.submodule fileTypeModule);
       description = "Extra files to add to the runtime path";
       default = { };
       example = lib.literalExpression ''
